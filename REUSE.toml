@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: OpenTalk GmbH <mail@opentalk.eu>
+#
+# SPDX-License-Identifier: EUPL-1.2
+
+SPDX-PackageDownloadLocation = "https://git.opentalk.dev/opentalk/backend/controller"
+SPDX-PackageName = "OpenTalk Controller"
+SPDX-PackageSupplier = "OpenTalk GmbH <mail@opentalk.eu>"
+version = 1
+
+[[annotations]]
+SPDX-FileCopyrightText = "OpenTalk GmbH <mail@opentalk.eu>"
+SPDX-License-Identifier = "EUPL-1.2"
+path = [
+  ".commitlintrc.json",
+  "Cargo.lock",
+  "README.md",
+  "ci/*",
+  "crates/**/README.md",
+  "renovate.json",
+]
+precedence = "aggregate"
