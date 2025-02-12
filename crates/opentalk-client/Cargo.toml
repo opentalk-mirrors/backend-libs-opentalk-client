@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: OpenTalk GmbH <mail@opentalk.eu>
+#
+# SPDX-License-Identifier: EUPL-1.2
+
+[package]
+edition = "2021"
+license = "EUPL-1.2"
+name = "opentalk-client"
+version = "0.1.0"
+
+[dependencies]

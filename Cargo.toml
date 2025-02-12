@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: OpenTalk GmbH <mail@opentalk.eu>
+#
+# SPDX-License-Identifier: EUPL-1.2
+
+[workspace]
+members = ["crates/*"]
+resolver = "3"
+
+[workspace.package]
+authors = ["OpenTalk Team <mail@opentalk.eu>"]
+homepage = "https://opentalk.eu/"
+repository = "https://gitlab.opencode.de/opentalk/libs/opentalk-client"
