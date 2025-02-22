@@ -19,3 +19,8 @@
     unused_qualifications,
     unused_results
 )]
+
+pub mod auth;
+
+#[cfg(test)]
+mod test_client;

@@ -10,3 +10,13 @@ resolver = "3"
 authors = ["OpenTalk Team <mail@opentalk.eu>"]
 homepage = "https://opentalk.eu/"
 repository = "https://gitlab.opencode.de/opentalk/libs/opentalk-client"
+
+[workspace.dependencies]
+http = "1.2.0"
+http-request-derive = "0.3.2"
+httpmock = "0.7.0"
+opentalk-types-api-v1 = "0.32.1"
+pretty_assertions = "1.4.1"
+reqwest = "0.12.12"
+snafu = "0.8.5"
+tokio = "1.43.0"

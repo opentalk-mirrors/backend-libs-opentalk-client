@@ -10,3 +10,13 @@ name = "opentalk-client-requests-api-v1"
 version = "0.1.0"
 
 [dependencies]
+http-request-derive.workspace = true
+opentalk-types-api-v1 = { workspace = true, features = ["serde"] }
+
+[dev-dependencies]
+http.workspace = true
+httpmock.workspace = true
+pretty_assertions = { workspace = true, features = ["unstable"] }
+reqwest = { workspace = true, features = ["json"] }
+snafu.workspace = true
+tokio = { workspace = true, features = ["macros", "rt"] }
