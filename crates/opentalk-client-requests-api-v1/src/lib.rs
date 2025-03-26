@@ -21,6 +21,7 @@
 )]
 
 pub mod auth;
+pub mod users;
 
 #[cfg(test)]
 mod test_client;
