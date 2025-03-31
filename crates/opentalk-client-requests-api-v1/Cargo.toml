@@ -12,6 +12,7 @@ version = "0.1.0"
 [dependencies]
 http-request-derive.workspace = true
 opentalk-types-api-v1 = { workspace = true, features = ["serde"] }
+opentalk-types-common = { workspace = true, features = ["serde"] }
 
 [dev-dependencies]
 http.workspace = true
