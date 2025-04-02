@@ -19,3 +19,7 @@
     unused_qualifications,
     unused_results
 )]
+
+mod client;
+
+pub use client::Client;
