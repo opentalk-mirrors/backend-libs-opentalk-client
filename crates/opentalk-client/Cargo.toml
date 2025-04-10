@@ -9,3 +9,12 @@ name = "opentalk-client"
 version = "0.1.0"
 
 [dependencies]
+anyhow.workspace = true
+http-request-derive.workspace = true
+http-request-derive-client.workspace = true
+http-request-derive-client-reqwest.workspace = true
+opentalk-client-requests-api-v1.workspace = true
+opentalk-types-api-v1.workspace = true
+serde = { workspace = true, features = ["derive"] }
+snafu.workspace = true
+url = { workspace = true, features = ["serde"] }

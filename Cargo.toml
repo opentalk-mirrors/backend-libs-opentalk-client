@@ -12,12 +12,21 @@ homepage = "https://opentalk.eu/"
 repository = "https://gitlab.opencode.de/opentalk/libs/opentalk-client"
 
 [workspace.dependencies]
+opentalk-client = { path = "crates/opentalk-client", version = "0.1.0" }
+opentalk-client-requests-api-v1 = { path = "crates/opentalk-client-requests-api-v1", version = "0.1.0" }
+
+anyhow = "1.0.97"
+clap = "4.5.35"
 http = "1.2.0"
 http-request-derive = "0.4.0"
+http-request-derive-client = "0.1.0"
+http-request-derive-client-reqwest = "0.1.0"
 httpmock = "0.7.0"
 opentalk-types-api-v1 = "0.35.0"
 opentalk-types-common = "0.32.2"
 pretty_assertions = "1.4.1"
 reqwest = "0.12.12"
+serde = "1.0.219"
 snafu = "0.8.5"
 tokio = "1.43.0"
+url = "2.5.4"

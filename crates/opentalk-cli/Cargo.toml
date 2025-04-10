@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: OpenTalk GmbH <mail@opentalk.eu>
+#
+# SPDX-License-Identifier: EUPL-1.2
+
+[package]
+edition = "2021"
+license = "EUPL-1.2"
+name = "opentalk-cli"
+version = "0.1.0"
+
+[dependencies]
+anyhow.workspace = true
+clap = { workspace = true, features = ["derive"] }
+opentalk-client.workspace = true
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+url = { workspace = true, features = ["serde"] }
