@@ -15,6 +15,7 @@ opentalk-types-api-v1 = { workspace = true, features = ["serde"] }
 opentalk-types-common = { workspace = true, features = ["serde"] }
 
 [dev-dependencies]
+chrono.workspace = true
 http.workspace = true
 httpmock.workspace = true
 pretty_assertions = { workspace = true, features = ["unstable"] }

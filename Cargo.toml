@@ -16,6 +16,7 @@ opentalk-client = { path = "crates/opentalk-client", version = "0.1.0" }
 opentalk-client-requests-api-v1 = { path = "crates/opentalk-client-requests-api-v1", version = "0.1.0" }
 
 anyhow = "1.0.97"
+chrono = "0.4.40"
 clap = "4.5.35"
 http = "1.2.0"
 http-request-derive = "0.4.0"
