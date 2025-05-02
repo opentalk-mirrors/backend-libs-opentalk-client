@@ -7,6 +7,9 @@ use clap::Parser;
 use opentalk_client::Client;
 use url::Url;
 
+mod config;
+mod config_manager;
+
 #[derive(Debug, Parser)]
 enum Command {
     /// Discover the API based on an OpenTalk frontend URL
