@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: OpenTalk GmbH <mail@opentalk.eu>
+//
+// SPDX-License-Identifier: EUPL-1.2
+
 use std::{fs, path::PathBuf};
 
 use snafu::{OptionExt, ResultExt as _, Snafu};
@@ -98,10 +102,10 @@ mod tests {
         config_manager::{ConfigError, ConfigManager},
     };
 
-    const EXAMPLE_CONFIG: &str = r"default_instance_url = 'https://ot.exemple.com/'
+    const EXAMPLE_CONFIG: &str = r"default_instance_url = 'https://ot.example.com/'
 
 [[instances]]
-url = 'https://ot.exemple.com/'
+url = 'https://ot.example.com/'
 default_account_name = 'one'
 
 [[instances.accounts]]
@@ -113,7 +117,7 @@ oidc_client_id = 'device'
 name = 'two'
 
 [[instances]]
-url = 'https://ot.exemple01.com/'
+url = 'https://ot01.example.com/'
 default_account_name = 'three'
 
 [[instances.accounts]]
@@ -123,10 +127,10 @@ name = 'three'
 
     fn example() -> Config {
         Config {
-            default_instance_url: Some(Url::parse("https://ot.exemple.com").unwrap()),
+            default_instance_url: Some(Url::parse("https://ot.example.com").unwrap()),
             instances: vec![
                 OpenTalkInstance {
-                    url: Url::parse("https://ot.exemple.com").unwrap(),
+                    url: Url::parse("https://ot.example.com").unwrap(),
                     default_account_name: "one".to_string(),
                     accounts: vec![
                         OpenTalkAccount {
@@ -140,7 +144,7 @@ name = 'three'
                     ],
                 },
                 OpenTalkInstance {
-                    url: Url::parse("https://ot.exemple01.com").unwrap(),
+                    url: Url::parse("https://ot01.example.com").unwrap(),
                     default_account_name: "three".to_string(),
                     accounts: vec![OpenTalkAccount {
                         oidc_client_id: "device".to_string(),
