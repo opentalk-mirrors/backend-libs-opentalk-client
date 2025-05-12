@@ -82,3 +82,41 @@ fn ensure_is_valid(s: &str) -> Result<(), ParseOpenTalkAccountIdError> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use pretty_assertions::assert_matches;
+
+    use super::OpenTalkAccountId;
+    use crate::opentalk_account_id::ParseOpenTalkAccountIdError;
+
+    #[test]
+    fn success_from_str() {
+        let id: Result<OpenTalkAccountId, ParseOpenTalkAccountIdError> = "opentalk-id".parse();
+        assert!(id.is_ok());
+    }
+
+    #[test]
+    fn error_to_short_from_str() {
+        let id: Result<OpenTalkAccountId, ParseOpenTalkAccountIdError> = "".parse();
+        assert_matches!(
+            id,
+            Err(ParseOpenTalkAccountIdError::TooShort { min_length: _ })
+        );
+    }
+
+    #[test]
+    fn error_to_long_from_str() {
+        let id: Result<OpenTalkAccountId, ParseOpenTalkAccountIdError> = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx".parse();
+        assert_matches!(
+            id,
+            Err(ParseOpenTalkAccountIdError::TooLong { max_length: _ })
+        );
+    }
+
+    #[test]
+    fn error_invalid_char_from_str() {
+        let id: Result<OpenTalkAccountId, ParseOpenTalkAccountIdError> = "*".parse();
+        assert_matches!(id, Err(ParseOpenTalkAccountIdError::InvalidCharacters));
+    }
+}
