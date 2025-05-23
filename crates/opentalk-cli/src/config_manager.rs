@@ -102,28 +102,28 @@ mod tests {
         config_manager::{ConfigError, ConfigManager},
     };
 
-    const EXAMPLE_CONFIG: &str = r"default_instance_url = 'https://ot.example.com/'
+    const EXAMPLE_CONFIG: &str = r#"default_instance_url = "https://ot.example.com/"
 
 [[instances]]
-url = 'https://ot.example.com/'
-default_account_name = 'one'
+url = "https://ot.example.com/"
+default_account_name = "one"
 
 [[instances.accounts]]
-oidc_client_id = 'device'
-name = 'one'
+oidc_client_id = "device"
+name = "one"
 
 [[instances.accounts]]
-oidc_client_id = 'device'
-name = 'two'
+oidc_client_id = "device"
+name = "two"
 
 [[instances]]
-url = 'https://ot01.example.com/'
-default_account_name = 'three'
+url = "https://ot01.example.com/"
+default_account_name = "three"
 
 [[instances.accounts]]
-oidc_client_id = 'device'
-name = 'three'
-";
+oidc_client_id = "device"
+name = "three"
+"#;
 
     fn example() -> Config {
         Config {
