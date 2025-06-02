@@ -90,11 +90,10 @@ impl ConfigManager {
 #[cfg(test)]
 mod tests {
 
-    use std::{io::Write as _, path::Path};
+    use std::{collections::BTreeMap, io::Write as _, path::Path};
 
     use pretty_assertions::{assert_eq, assert_matches};
     use tempfile::tempdir;
-    use url::Url;
 
     use super::Config;
     use crate::{
@@ -102,56 +101,61 @@ mod tests {
         config_manager::{ConfigError, ConfigManager},
     };
 
-    const EXAMPLE_CONFIG: &str = r#"default_instance_url = "https://ot.example.com/"
+    const EXAMPLE_CONFIG: &str = r#"default_instance = "https://ot.example.com/"
 
-[[instances]]
-url = "https://ot.example.com/"
-default_account_name = "one"
+[instances."https://ot.example.com/"]
+default_account = "one"
 
-[[instances.accounts]]
+[instances."https://ot.example.com/".accounts.one]
 oidc_client_id = "device"
-name = "one"
 
-[[instances.accounts]]
+[instances."https://ot.example.com/".accounts.two]
 oidc_client_id = "device"
-name = "two"
 
-[[instances]]
-url = "https://ot01.example.com/"
-default_account_name = "three"
+[instances."https://ot01.example.com/"]
+default_account = "three"
 
-[[instances.accounts]]
+[instances."https://ot01.example.com/".accounts.three]
 oidc_client_id = "device"
-name = "three"
 "#;
 
     fn example() -> Config {
         Config {
-            default_instance_url: Some(Url::parse("https://ot.example.com").unwrap()),
-            instances: vec![
-                OpenTalkInstance {
-                    url: Url::parse("https://ot.example.com").unwrap(),
-                    default_account_name: "one".to_string(),
-                    accounts: vec![
-                        OpenTalkAccount {
-                            oidc_client_id: "device".to_string(),
-                            name: "one".to_string(),
-                        },
-                        OpenTalkAccount {
-                            oidc_client_id: "device".to_string(),
-                            name: "two".to_string(),
-                        },
-                    ],
-                },
-                OpenTalkInstance {
-                    url: Url::parse("https://ot01.example.com").unwrap(),
-                    default_account_name: "three".to_string(),
-                    accounts: vec![OpenTalkAccount {
-                        oidc_client_id: "device".to_string(),
-                        name: "three".to_string(),
-                    }],
-                },
-            ],
+            default_instance: Some("https://ot.example.com".parse().unwrap()),
+            instances: BTreeMap::from_iter([
+                (
+                    "https://ot.example.com".parse().unwrap(),
+                    OpenTalkInstance {
+                        default_account: "one".to_string(),
+                        accounts: BTreeMap::from_iter([
+                            (
+                                "one".parse().unwrap(),
+                                OpenTalkAccount {
+                                    oidc_client_id: "device".to_string(),
+                                },
+                            ),
+                            (
+                                "two".parse().unwrap(),
+                                OpenTalkAccount {
+                                    oidc_client_id: "device".to_string(),
+                                },
+                            ),
+                        ]),
+                    },
+                ),
+                (
+                    "https://ot01.example.com".parse().unwrap(),
+                    OpenTalkInstance {
+                        default_account: "three".to_string(),
+                        accounts: BTreeMap::from_iter([(
+                            "three".parse().unwrap(),
+                            OpenTalkAccount {
+                                oidc_client_id: "device".to_string(),
+                            },
+                        )]),
+                    },
+                ),
+            ]),
         }
     }
 
@@ -169,7 +173,7 @@ name = "three"
         };
         let conf = config_manager.load().unwrap();
 
-        assert_eq!(conf, Config::default());
+        assert_eq!(Config::default(), conf);
     }
 
     #[test]
@@ -201,7 +205,7 @@ name = "three"
         };
         let conf = config_manager.load().unwrap();
 
-        assert_eq!(conf, example());
+        assert_eq!(example(), conf);
     }
 
     #[test]
@@ -219,7 +223,7 @@ name = "three"
 
         let stored_config = std::fs::read_to_string(&config_path).unwrap();
 
-        assert_eq!(stored_config, EXAMPLE_CONFIG);
+        assert_eq!(EXAMPLE_CONFIG, stored_config);
     }
 
     #[test]
@@ -227,8 +231,8 @@ name = "three"
         std::env::set_var("XDG_CONFIG_HOME", "/home/example/.config");
         let config_manager = ConfigManager::new().unwrap();
         assert_eq!(
+            Path::new("/home/example/.config/opentalk/cli.toml"),
             config_manager.path,
-            Path::new("/home/example/.config/opentalk/cli.toml")
         );
     }
 }

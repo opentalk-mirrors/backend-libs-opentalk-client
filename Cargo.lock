@@ -1661,10 +1661,12 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
+ "derive_more",
  "dirs",
  "opentalk-client",
  "pretty_assertions",
  "serde",
+ "serde_with",
  "snafu",
  "tempfile",
  "tokio",
