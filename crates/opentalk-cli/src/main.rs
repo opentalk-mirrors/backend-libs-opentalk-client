@@ -9,6 +9,8 @@ use url::Url;
 
 mod config;
 mod config_manager;
+mod opentalk_account_id;
+mod opentalk_instance_id;
 
 #[derive(Debug, Parser)]
 enum Command {
