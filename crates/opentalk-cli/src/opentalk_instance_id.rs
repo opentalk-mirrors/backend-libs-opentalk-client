@@ -21,3 +21,13 @@ use url::Url;
     derive_more::FromStr,
 )]
 pub struct OpenTalkInstanceId(Url);
+
+impl OpenTalkInstanceId {
+    pub fn to_file_name(&self) -> String {
+        format!(
+            "{}_{}",
+            self.0.host_str().unwrap(),
+            self.0.path().replace("_", "__").replace("/", "_")
+        )
+    }
+}
