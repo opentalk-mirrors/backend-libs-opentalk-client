@@ -126,7 +126,7 @@ oidc_client_id = "device"
                 (
                     "https://ot.example.com".parse().unwrap(),
                     OpenTalkInstance {
-                        default_account: "one".to_string(),
+                        default_account: "one".parse().unwrap(),
                         accounts: BTreeMap::from_iter([
                             (
                                 "one".parse().unwrap(),
@@ -146,7 +146,7 @@ oidc_client_id = "device"
                 (
                     "https://ot01.example.com".parse().unwrap(),
                     OpenTalkInstance {
-                        default_account: "three".to_string(),
+                        default_account: "three".parse().unwrap(),
                         accounts: BTreeMap::from_iter([(
                             "three".parse().unwrap(),
                             OpenTalkAccount {
