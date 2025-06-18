@@ -23,7 +23,7 @@ pub struct Config {
 /// OpenTalk instance
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct OpenTalkInstance {
-    pub default_account: String,
+    pub default_account: OpenTalkAccountId,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub accounts: BTreeMap<OpenTalkAccountId, OpenTalkAccount>,
 }
