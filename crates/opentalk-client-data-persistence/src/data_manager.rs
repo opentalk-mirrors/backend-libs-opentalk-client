@@ -2,56 +2,27 @@
 //
 // SPDX-License-Identifier: EUPL-1.2
 
-use std::{fs, path::PathBuf};
+use std::path::PathBuf;
 
-use snafu::{OptionExt, ResultExt as _, Snafu};
+use snafu::{OptionExt as _, ResultExt as _};
 
-use crate::{data::AccountData, opntalk_instance_account_id::OpenTalkInstanceAccountId};
-
-#[derive(Debug, Snafu)]
-pub enum DataError {
-    #[snafu(display("Data can't be loaded from {path:?}"))]
-    NotLoadable {
-        path: PathBuf,
-        source: std::io::Error,
+use crate::{
+    account_data_file::AccountDataFile,
+    data_error::{
+        FolderNotCreatableSnafu, NotLoadableSnafu, NotReadableSnafu, NotStorableSnafu,
+        NotWriteableSnafu, SystemDataHomeNotSetSnafu,
     },
+    AccountTokens, DataError, OpenTalkInstanceAccountId,
+};
 
-    #[snafu(display("Data can't be stored to {path:?}"))]
-    NotStorable {
-        path: PathBuf,
-        source: std::io::Error,
-    },
-
-    #[snafu(display("Data folder can't be created under {path:?}"))]
-    FolderNotCreatable {
-        path: PathBuf,
-        source: std::io::Error,
-    },
-
-    #[snafu(display("System data home not set"))]
-    SystemDataHomeNotSet,
-
-    #[snafu(display("Data not readable from {path:?}"))]
-    NotReadable {
-        path: PathBuf,
-        source: toml::de::Error,
-    },
-
-    #[snafu(display("Data not writeable to {path:?}"))]
-    NotWriteable {
-        path: PathBuf,
-        source: toml::ser::Error,
-    },
-}
-
-/// The DataManager stores and loads configs from providered pathes
+/// The [`DataManager`] stores and loads configs from providered pathes
 #[derive(Debug)]
 pub struct DataManager {
     path: PathBuf,
 }
 
 impl DataManager {
-    /// Returns DataManager instance
+    /// Returns [`DataManager`] instance
     pub fn new() -> Result<Self, DataError> {
         let data_path = dirs::data_dir()
             .context(SystemDataHomeNotSetSnafu)?
@@ -65,37 +36,40 @@ impl DataManager {
     }
 
     /// Load instaceData
-    pub fn load_instance(&self, id: OpenTalkInstanceAccountId) -> Result<AccountData, DataError> {
-        let file = fs::read_to_string(self.data_file_path(id)).context(NotLoadableSnafu {
+    pub fn load_instance(&self, id: OpenTalkInstanceAccountId) -> Result<AccountTokens, DataError> {
+        let file = std::fs::read_to_string(self.data_file_path(id)).context(NotLoadableSnafu {
             path: self.path.clone(),
         })?;
 
-        let data = toml::from_str(file.as_str()).context(NotReadableSnafu {
+        let data: AccountDataFile = toml::from_str(file.as_str()).context(NotReadableSnafu {
             path: self.path.clone(),
         })?;
 
-        Ok(data)
+        Ok(data.opentalk_account_tokens)
     }
 
     /// Store instaceData
     pub fn store_instance(
         &self,
         id: OpenTalkInstanceAccountId,
-        account: AccountData,
+        opentalk_account_tokens: AccountTokens,
     ) -> Result<(), DataError> {
         let data_path = self.data_file_path(id);
 
         if !data_path.as_path().exists() {
-            fs::create_dir_all(&data_path).context(FolderNotCreatableSnafu {
+            std::fs::create_dir_all(&data_path).context(FolderNotCreatableSnafu {
                 path: data_path.clone(),
             })?;
         }
 
-        let data_str = toml::to_string_pretty(&account).context(NotWriteableSnafu {
+        let data_str = toml::to_string_pretty(&AccountDataFile {
+            opentalk_account_tokens,
+        })
+        .context(NotWriteableSnafu {
             path: data_path.clone(),
         })?;
 
-        fs::write(&data_path, data_str).context(NotStorableSnafu { path: data_path })?;
+        std::fs::write(&data_path, data_str).context(NotStorableSnafu { path: data_path })?;
 
         Ok(())
     }
@@ -103,24 +77,25 @@ impl DataManager {
 
 #[cfg(test)]
 mod tests {
-    use std::{fs, io::Write as _, path::Path};
+    use std::{io::Write as _, path::Path};
 
     use pretty_assertions::{assert_eq, assert_matches};
     use tempfile::tempdir;
 
-    use crate::{
-        data::AccountData,
-        data_manager::{DataError, DataManager},
-    };
+    use super::DataManager;
+    use crate::{AccountTokens, DataError};
 
-    const EXAMPLE_DATA: &str = r#"access_token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-refresh_token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    const EXAMPLE_DATA: &str = r#"[opentalk_account_tokens]
+access_token_expiry = "2025-01-01T02:03:04Z"
+access_token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+refresh_token = "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
 "#;
 
-    fn example() -> AccountData {
-        AccountData {
+    fn example() -> AccountTokens {
+        AccountTokens {
+            access_token_expiry: "2025-01-01T02:03:04Z".parse().unwrap(),
             access_token: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx".to_string(),
-            refresh_token: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx".to_string(),
+            refresh_token: "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy".to_string(),
         }
     }
 
@@ -130,7 +105,7 @@ refresh_token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
         let temp_dir = tempdir().unwrap();
 
         let data_path = temp_dir.path().join("data");
-        let _ = fs::create_dir_all(&data_path);
+        let _ = std::fs::create_dir_all(&data_path);
 
         let data_manager = DataManager {
             path: data_path.clone(),
@@ -180,7 +155,7 @@ refresh_token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
         let temp_dir = tempdir().unwrap();
 
         let data_path = temp_dir.path().join("data");
-        let _ = fs::create_dir_all(&data_path);
+        let _ = std::fs::create_dir_all(&data_path);
 
         let data_manager = DataManager {
             path: data_path.clone(),
@@ -214,7 +189,7 @@ refresh_token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
         let temp_dir = tempdir().unwrap();
 
         let data_path = temp_dir.path().join("data");
-        let _ = fs::create_dir_all(&data_path);
+        let _ = std::fs::create_dir_all(&data_path);
 
         let data_manager = DataManager {
             path: data_path.clone(),

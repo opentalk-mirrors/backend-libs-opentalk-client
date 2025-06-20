@@ -12,6 +12,8 @@ use serde::{Deserialize, Serialize};
 use snafu::{ResultExt as _, Snafu};
 use url::Url;
 
+use crate::oidc::{OidcEndpoints, OidcWellKnownRequest};
+
 #[derive(Debug, Snafu)]
 pub enum ClientError {
     HttpRequestDeriveClient { source: ReqwestClientError },
@@ -21,6 +23,7 @@ pub enum ClientError {
 #[derive(Debug)]
 pub struct Client {
     inner: ReqwestClient,
+    _oidc_endpoints: OidcEndpoints,
 }
 
 impl Client {
@@ -28,15 +31,25 @@ impl Client {
     pub async fn discover(url: Url) -> Result<Self> {
         let discovery_client = ReqwestClient::new(url);
         let ClientWellKnownBody {
-            opentalk_controller: ControllerBaseInfo { base_url },
+            opentalk_controller: ControllerBaseInfo { mut base_url },
         } = discovery_client
             .execute(WellKnownRequest)
             .await
             .context(HttpRequestDeriveClientSnafu)?;
 
-        let api_url = base_url.join("v1")?;
-        let inner = ReqwestClient::new(api_url);
-        Ok(Self { inner })
+        _ = base_url.path_segments_mut().unwrap().push("v1");
+        let inner = ReqwestClient::new(base_url);
+
+        let GetLoginResponseBody { oidc } = inner.execute(LoginGetRequest).await?;
+
+        let oidc_url = oidc.url.parse()?;
+        let oidc_client = ReqwestClient::new(oidc_url);
+
+        let oidc_endpoints = oidc_client.execute(OidcWellKnownRequest).await?;
+        Ok(Self {
+            inner,
+            _oidc_endpoints: oidc_endpoints,
+        })
     }
 
     /// Query the OIDC provider information from the OpenTalk API

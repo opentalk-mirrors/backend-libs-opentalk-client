@@ -5,6 +5,7 @@
 use serde::{Deserialize, Serialize};
 use url::Url;
 
+/// The id of an OpenTalk instance in the format of a URL.
 #[derive(
     Debug,
     Clone,
@@ -23,6 +24,7 @@ use url::Url;
 pub struct OpenTalkInstanceId(Url);
 
 impl OpenTalkInstanceId {
+    /// Convert the contained URL to a string that can be used in a file name.
     pub fn to_file_name(&self) -> String {
         format!(
             "{}_{}",

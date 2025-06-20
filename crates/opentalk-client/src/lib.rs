@@ -21,5 +21,6 @@
 )]
 
 mod client;
+mod oidc;
 
 pub use client::Client;

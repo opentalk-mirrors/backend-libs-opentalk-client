@@ -70,6 +70,9 @@ exceptions = [
   ], name = "opentalk-client" },
   { allow = [
     "EUPL-1.2",
+  ], name = "opentalk-client-data-persistence" },
+  { allow = [
+    "EUPL-1.2",
   ], name = "opentalk-client-requests-api-v1" },
   { allow = [
     "EUPL-1.2",
