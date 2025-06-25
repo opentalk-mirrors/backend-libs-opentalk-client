@@ -1667,15 +1667,9 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
- "dirs",
  "opentalk-client",
  "opentalk-client-data-persistence",
- "pretty_assertions",
- "serde",
- "snafu",
- "tempfile",
  "tokio",
- "toml",
  "url",
 ]
 

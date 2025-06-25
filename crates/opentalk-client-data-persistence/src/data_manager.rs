@@ -15,14 +15,14 @@ use crate::{
     AccountTokens, DataError, OpenTalkInstanceAccountId,
 };
 
-/// The [`DataManager`] stores and loads configs from providered pathes
+/// The [DataManager] stores and loads configs from providered pathes
 #[derive(Debug)]
 pub struct DataManager {
     path: PathBuf,
 }
 
 impl DataManager {
-    /// Returns [`DataManager`] instance
+    /// Returns [DataManager] instance
     pub fn new() -> Result<Self, DataError> {
         let data_path = dirs::data_dir()
             .context(SystemDataHomeNotSetSnafu)?
