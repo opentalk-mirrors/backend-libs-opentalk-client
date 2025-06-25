@@ -4,9 +4,8 @@
 
 use std::collections::BTreeMap;
 
+use opentalk_client_data_persistence::{OpenTalkAccountId, OpenTalkInstanceId};
 use serde::{Deserialize, Serialize};
-
-use crate::{opentalk_account_id::OpenTalkAccountId, opentalk_instance_id::OpenTalkInstanceId};
 
 /// Config to store needable state of the opentalk cli
 #[derive(Debug, Clone, PartialEq, Eq, Default, Deserialize, Serialize)]

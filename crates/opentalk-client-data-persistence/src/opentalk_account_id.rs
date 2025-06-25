@@ -11,6 +11,7 @@ pub const OPENTALK_ACCOUNT_ID_MIN_LENGTH: usize = 1;
 
 pub const OPENTALK_ACCOUNT_ID_MAX_LENGTH: usize = 100;
 
+/// The id of an OpenTalk account.
 #[derive(
     Debug,
     Clone,
@@ -27,9 +28,7 @@ pub const OPENTALK_ACCOUNT_ID_MAX_LENGTH: usize = 100;
 pub struct OpenTalkAccountId(String);
 
 /// The error that is returned by [OpenTalkAccountId::from_str] on failure.
-
 #[derive(Debug, Snafu)]
-
 pub enum ParseOpenTalkAccountIdError {
     /// Invalid characters were found in the input data.
     #[snafu(display("OpenTalk account id may only contain alphanumeric characters and \"-\""))]

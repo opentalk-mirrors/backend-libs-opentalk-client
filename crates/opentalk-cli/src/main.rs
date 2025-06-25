@@ -7,22 +7,16 @@ use std::collections::BTreeMap;
 use anyhow::Result;
 use clap::Parser;
 use opentalk_client::Client;
+use opentalk_client_data_persistence::{OpenTalkAccountId, OpenTalkInstanceId};
 use url::Url;
 
 use crate::{
     config::{OpenTalkAccount, OpenTalkInstance},
     config_manager::ConfigManager,
-    opentalk_account_id::OpenTalkAccountId,
-    opentalk_instance_id::OpenTalkInstanceId,
 };
 
 mod config;
 mod config_manager;
-mod data;
-mod data_manager;
-mod opentalk_account_id;
-mod opentalk_instance_id;
-mod opntalk_instance_account_id;
 
 #[derive(Debug, Parser)]
 enum Command {
@@ -61,7 +55,7 @@ async fn main() -> Result<()> {
             account_id,
             oidc_client_id,
         } => {
-            login(instance_url, account_id, oidc_client_id)?;
+            login(instance_url, account_id, oidc_client_id).await?;
         }
         Command::Logout {
             instance_url,
@@ -126,11 +120,12 @@ fn logout(instance_url: OpenTalkInstanceId, account_id: OpenTalkAccountId) -> Re
     Ok(())
 }
 
-fn login(
+async fn login(
     instance_url: OpenTalkInstanceId,
     account_id: OpenTalkAccountId,
     oidc_client_id: String,
 ) -> Result<()> {
+    let _client = Client::discover(instance_url.as_ref().clone()).await?;
     // Perform oidc device auth
 
     let conf_manager = ConfigManager::new()?;
