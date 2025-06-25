@@ -4,52 +4,25 @@
 
 use std::{fs, path::PathBuf};
 
-use snafu::{OptionExt, ResultExt as _, Snafu};
+use snafu::{OptionExt, ResultExt as _};
 
-use crate::config::Config;
-
-#[derive(Debug, Snafu)]
-pub enum ConfigError {
-    #[snafu(display("Config can't be loaded from {path:?}"))]
-    NotLoadable {
-        path: PathBuf,
-        source: std::io::Error,
+use crate::{
+    config::Config,
+    config_error::{
+        FolderNotCreatableSnafu, NotLoadableSnafu, NotReadableSnafu, NotStorableSnafu,
+        NotWriteableSnafu, SystemConfigHomeNotSetSnafu,
     },
+    ConfigError,
+};
 
-    #[snafu(display("Config can't be stored to {path:?}"))]
-    NotStorable {
-        path: PathBuf,
-        source: std::io::Error,
-    },
-
-    #[snafu(display("Config folder can't be created under {path:?}"))]
-    FolderNotCreatable {
-        path: PathBuf,
-        source: std::io::Error,
-    },
-
-    #[snafu(display("System config home not set"))]
-    SystemConfigHomeNotSet,
-
-    #[snafu(display("Config not readable from {path:?}"))]
-    NotReadable {
-        path: PathBuf,
-        source: toml::de::Error,
-    },
-
-    #[snafu(display("Config not writeable to {path:?}"))]
-    NotWriteable {
-        path: PathBuf,
-        source: toml::ser::Error,
-    },
-}
-
-/// The ConfigManager stores and loads configs from providered pathes
+/// The [ConfigManager] stores and loads configs from providered pathes
+#[derive(Debug)]
 pub struct ConfigManager {
     path: PathBuf,
 }
 
 impl ConfigManager {
+    /// Create a new [ConfigManager] instance.
     pub fn new() -> Result<Self, ConfigError> {
         let config_path = dirs::config_dir()
             .context(SystemConfigHomeNotSetSnafu)?
@@ -97,8 +70,9 @@ mod tests {
 
     use super::Config;
     use crate::{
-        config::{OpenTalkAccount, OpenTalkInstance},
         config_manager::{ConfigError, ConfigManager},
+        opentalk_instance_config::OpenTalkInstanceConfig,
+        OpenTalkAccountConfig,
     };
 
     const EXAMPLE_CONFIG: &str = r#"default_instance = "https://ot.example.com/"
@@ -125,18 +99,18 @@ oidc_client_id = "device"
             instances: BTreeMap::from_iter([
                 (
                     "https://ot.example.com".parse().unwrap(),
-                    OpenTalkInstance {
+                    OpenTalkInstanceConfig {
                         default_account: "one".parse().unwrap(),
                         accounts: BTreeMap::from_iter([
                             (
                                 "one".parse().unwrap(),
-                                OpenTalkAccount {
+                                OpenTalkAccountConfig {
                                     oidc_client_id: "device".to_string(),
                                 },
                             ),
                             (
                                 "two".parse().unwrap(),
-                                OpenTalkAccount {
+                                OpenTalkAccountConfig {
                                     oidc_client_id: "device".to_string(),
                                 },
                             ),
@@ -145,11 +119,11 @@ oidc_client_id = "device"
                 ),
                 (
                     "https://ot01.example.com".parse().unwrap(),
-                    OpenTalkInstance {
+                    OpenTalkInstanceConfig {
                         default_account: "three".parse().unwrap(),
                         accounts: BTreeMap::from_iter([(
                             "three".parse().unwrap(),
-                            OpenTalkAccount {
+                            OpenTalkAccountConfig {
                                 oidc_client_id: "device".to_string(),
                             },
                         )]),

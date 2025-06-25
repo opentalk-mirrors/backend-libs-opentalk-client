@@ -7,16 +7,11 @@ use std::collections::BTreeMap;
 use anyhow::Result;
 use clap::Parser;
 use opentalk_client::Client;
-use opentalk_client_data_persistence::{OpenTalkAccountId, OpenTalkInstanceId};
-use url::Url;
-
-use crate::{
-    config::{OpenTalkAccount, OpenTalkInstance},
-    config_manager::ConfigManager,
+use opentalk_client_data_persistence::{
+    ConfigManager, OpenTalkAccountConfig, OpenTalkAccountId, OpenTalkInstanceConfig,
+    OpenTalkInstanceId,
 };
-
-mod config;
-mod config_manager;
+use url::Url;
 
 #[derive(Debug, Parser)]
 enum Command {
@@ -136,17 +131,17 @@ async fn login(
             let mut tmp_instance = current_instance.clone();
             tmp_instance.accounts.insert(
                 account_id.clone(),
-                OpenTalkAccount {
+                OpenTalkAccountConfig {
                     oidc_client_id: oidc_client_id.clone(),
                 },
             );
             tmp_instance
         }
-        None => OpenTalkInstance {
+        None => OpenTalkInstanceConfig {
             default_account: account_id.clone(),
             accounts: BTreeMap::from_iter([(
                 account_id.clone(),
-                OpenTalkAccount {
+                OpenTalkAccountConfig {
                     oidc_client_id: oidc_client_id.clone(),
                 },
             )]),
