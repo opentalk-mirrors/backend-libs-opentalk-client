@@ -1722,9 +1722,9 @@ dependencies = [
 
 [[package]]
 name = "opentalk-types-api-v1"
-version = "0.39.1"
+version = "0.40.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b48ffa662aa65d1d20ca46163614dea0ed54ce378b2db1f9d9e1983570831cac"
+checksum = "2caed17de8895aacca6206ffd0ba01781d3a308a6c188d56f0b4e0fc897b896c"
 dependencies = [
  "base64 0.22.1",
  "bincode",
@@ -1739,9 +1739,9 @@ dependencies = [
 
 [[package]]
 name = "opentalk-types-common"
-version = "0.35.5"
+version = "0.36.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b1438224d32de6244e879b92c3841f85315cb5b908b6f9777ad6012bf377df2"
+checksum = "b1fb63bac5adbc4845662c2ea7b7fc6d36940d1f5d23f6a577532bbdfb5de2f9"
 dependencies = [
  "chrono",
  "chrono-tz",
@@ -1760,9 +1760,9 @@ dependencies = [
 
 [[package]]
 name = "opentalk-types-common-identifiers"
-version = "0.32.0"
+version = "0.33.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80484edfb74f38dd9dcfdbb962d3c5e38417ea919649346b779733a5d6e4edc1"
+checksum = "48920a374d6fd87ca1bfbe237e966e821f8bb0e0ebf0de1039aed64f6a464222"
 dependencies = [
  "derive_more",
  "serde",
@@ -1772,9 +1772,9 @@ dependencies = [
 
 [[package]]
 name = "opentalk-types-common-macros"
-version = "0.31.2"
+version = "0.32.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3245dab4b984bccfd1fa21b588c359ad5a53458844cf78acbb08090e827ed4df"
+checksum = "5aff14ff5815976bbedb0c652565beb6e88e80e6886f15eca25a734deab2d344"
 dependencies = [
  "opentalk-types-common-identifiers",
  "proc-macro-crate",
