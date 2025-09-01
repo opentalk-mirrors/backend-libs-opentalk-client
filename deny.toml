@@ -27,7 +27,18 @@ db-urls = ["https://github.com/rustsec/advisory-db"]
 yanked = "deny"
 # A list of advisory IDs to ignore. Note that ignored advisories will still
 # output a note when they are encountered.
-ignore = []
+ignore = [
+
+  # async-std is unmaintained and deprecated.
+  #  async-std v1.13.2
+  #    ├── async-object-pool v0.1.5
+  #    │   └── httpmock v0.7.0
+  #    │       └── (dev) opentalk-client-requests-api-v1 v0.1.0
+  #    │           └── opentalk-client v0.1.0
+  #    │               └── opentalk-cli v0.1.0
+  #    └── httpmock v0.7.0 (*)
+  "RUSTSEC-2025-0052",
+]
 # Threshold for security vulnerabilities, any vulnerability with a CVSS score
 # lower than the range specified will be ignored. Note that ignored advisories
 # will still output a note when they are encountered.
