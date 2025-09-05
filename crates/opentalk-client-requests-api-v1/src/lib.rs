@@ -21,7 +21,13 @@
 )]
 
 pub mod auth;
+pub mod events;
 pub mod users;
+
+pub use events::EventsGetRequest;
+pub use users::{
+    UsersFindGetRequest, UsersMeAssetsGetRequest, UsersMeGetRequest, UsersMePatchRequest,
+};
 
 #[cfg(test)]
 mod test_client;

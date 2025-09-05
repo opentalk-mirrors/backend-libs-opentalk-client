@@ -8,6 +8,18 @@ use crate::{opentalk_account_id::OpenTalkAccountId, opentalk_instance_id::OpenTa
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct OpenTalkInstanceAccountId(OpenTalkInstanceId, OpenTalkAccountId);
 
+impl OpenTalkInstanceAccountId {
+    /// Get the instance id.
+    pub fn instance_id(&self) -> &OpenTalkInstanceId {
+        &self.0
+    }
+
+    /// Get the account id.
+    pub fn account_id(&self) -> &OpenTalkAccountId {
+        &self.1
+    }
+}
+
 impl From<(OpenTalkInstanceId, OpenTalkAccountId)> for OpenTalkInstanceAccountId {
     fn from((instance, account): (OpenTalkInstanceId, OpenTalkAccountId)) -> Self {
         Self(instance, account)

@@ -7,7 +7,7 @@ use serde::Deserialize;
 use url::Url;
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
-pub(crate) struct OidcEndpoints {
+pub struct OidcEndpoints {
     pub device_authorization_endpoint: Url,
     pub authorization_endpoint: Url,
     pub token_endpoint: Url,

@@ -5,7 +5,7 @@
 use std::str::FromStr;
 
 use serde::Serialize;
-use snafu::{ensure, Snafu};
+use snafu::{Snafu, ensure};
 
 pub const OPENTALK_ACCOUNT_ID_MIN_LENGTH: usize = 1;
 

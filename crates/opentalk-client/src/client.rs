@@ -12,7 +12,10 @@ use serde::{Deserialize, Serialize};
 use snafu::{ResultExt as _, Snafu};
 use url::Url;
 
-use crate::oidc::{OidcEndpoints, OidcWellKnownRequest};
+use crate::{
+    AuthenticatedClient, Authorization,
+    oidc::{OidcEndpoints, OidcWellKnownRequest},
+};
 
 #[derive(Debug, Snafu)]
 pub enum ClientError {
@@ -23,7 +26,10 @@ pub enum ClientError {
 #[derive(Debug)]
 pub struct Client {
     inner: ReqwestClient,
-    _oidc_endpoints: OidcEndpoints,
+    #[allow(unused)]
+    oidc_url: Url,
+    #[allow(unused)]
+    base_url: Url,
 }
 
 impl Client {
@@ -32,24 +38,30 @@ impl Client {
         let discovery_client = ReqwestClient::new(url);
         let ClientWellKnownBody {
             opentalk_controller: ControllerBaseInfo { mut base_url },
-        } = discovery_client
+        }: ClientWellKnownBody = discovery_client
             .execute(WellKnownRequest)
             .await
             .context(HttpRequestDeriveClientSnafu)?;
 
         _ = base_url.path_segments_mut().unwrap().push("v1");
-        let inner = ReqwestClient::new(base_url);
+        let inner = ReqwestClient::new(base_url.clone());
 
         let GetLoginResponseBody { oidc } = inner.execute(LoginGetRequest).await?;
 
         let oidc_url = oidc.url.parse()?;
-        let oidc_client = ReqwestClient::new(oidc_url);
 
-        let oidc_endpoints = oidc_client.execute(OidcWellKnownRequest).await?;
         Ok(Self {
+            oidc_url,
+            base_url,
             inner,
-            _oidc_endpoints: oidc_endpoints,
         })
+    }
+
+    /// Get the oidc endpoints from the OIDC provider.
+    pub async fn get_oidc_endpoints(&self) -> Result<OidcEndpoints> {
+        let oidc_client = ReqwestClient::new(self.oidc_url.clone());
+        let oidc_endpoints = oidc_client.execute(OidcWellKnownRequest).await?;
+        Ok(oidc_endpoints)
     }
 
     /// Query the OIDC provider information from the OpenTalk API
@@ -57,6 +69,26 @@ impl Client {
         let GetLoginResponseBody { oidc } = self.inner.execute(LoginGetRequest).await?;
         Ok(oidc)
     }
+
+    /// execute request without authorization
+    pub async fn execute<R: HttpRequest + Send>(
+        &self,
+        request: R,
+    ) -> Result<R::Response, ReqwestClientError> {
+        self.inner.execute(request).await
+    }
+
+    /// execute request with authorization
+    pub async fn execute_authorized<R: HttpRequest + Send, A: Authorization + Sync>(
+        &self,
+        request: R,
+        authorization: A,
+    ) -> Result<R::Response, ReqwestClientError> {
+        let authenticated_client = AuthenticatedClient::new(self.inner.clone(), authorization);
+        authenticated_client.execute(request).await
+    }
+
+    // fn refresh_access_token(&self, instance_account_id: OpenTalkInstanceAccountId)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, HttpRequest)]

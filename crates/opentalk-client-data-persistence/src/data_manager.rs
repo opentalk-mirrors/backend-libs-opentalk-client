@@ -2,20 +2,20 @@
 //
 // SPDX-License-Identifier: EUPL-1.2
 
-use std::path::PathBuf;
+use std::{fs, path::PathBuf};
 
 use snafu::{OptionExt as _, ResultExt as _};
 
 use crate::{
+    AccountTokens, DataError, OpenTalkInstanceAccountId,
     account_data_file::AccountDataFile,
     data_error::{
         FolderNotCreatableSnafu, NotLoadableSnafu, NotReadableSnafu, NotStorableSnafu,
         NotWriteableSnafu, SystemDataHomeNotSetSnafu,
     },
-    AccountTokens, DataError, OpenTalkInstanceAccountId,
 };
 
-/// The [DataManager] stores and loads configs from providered pathes
+/// The [DataManager] stores and loads local data from provided pathes
 #[derive(Debug)]
 pub struct DataManager {
     path: PathBuf,
@@ -31,13 +31,16 @@ impl DataManager {
         Ok(Self { path: data_path })
     }
 
-    fn data_file_path(&self, id: OpenTalkInstanceAccountId) -> PathBuf {
+    fn data_file_path(&self, id: &OpenTalkInstanceAccountId) -> PathBuf {
         self.path.join(format!("{}.toml", id.to_file_stem()))
     }
 
     /// Load instaceData
-    pub fn load_instance(&self, id: OpenTalkInstanceAccountId) -> Result<AccountTokens, DataError> {
-        let file = std::fs::read_to_string(self.data_file_path(id)).context(NotLoadableSnafu {
+    pub fn load_instance(
+        &self,
+        id: &OpenTalkInstanceAccountId,
+    ) -> Result<AccountTokens, DataError> {
+        let file = fs::read_to_string(self.data_file_path(id)).context(NotLoadableSnafu {
             path: self.path.clone(),
         })?;
 
@@ -51,15 +54,13 @@ impl DataManager {
     /// Store instaceData
     pub fn store_instance(
         &self,
-        id: OpenTalkInstanceAccountId,
+        id: &OpenTalkInstanceAccountId,
         opentalk_account_tokens: AccountTokens,
     ) -> Result<(), DataError> {
         let data_path = self.data_file_path(id);
 
-        if !data_path.as_path().exists() {
-            std::fs::create_dir_all(&data_path).context(FolderNotCreatableSnafu {
-                path: data_path.clone(),
-            })?;
+        if let Some(data_dir) = data_path.parent() {
+            fs::create_dir_all(data_dir).context(FolderNotCreatableSnafu { path: data_dir })?;
         }
 
         let data_str = toml::to_string_pretty(&AccountDataFile {
@@ -69,7 +70,7 @@ impl DataManager {
             path: data_path.clone(),
         })?;
 
-        std::fs::write(&data_path, data_str).context(NotStorableSnafu { path: data_path })?;
+        fs::write(&data_path, data_str).context(NotStorableSnafu { path: data_path })?;
 
         Ok(())
     }
@@ -118,7 +119,7 @@ refresh_token = "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
         }
 
         let data = data_manager.load_instance(
-            (
+            &(
                 "http://example_instance.example".parse().unwrap(),
                 "example-account".parse().unwrap(),
             )
@@ -139,7 +140,7 @@ refresh_token = "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
         };
 
         let data = data_manager.load_instance(
-            (
+            &(
                 "http://example_instance.example".parse().unwrap(),
                 "example-account".parse().unwrap(),
             )
@@ -170,7 +171,7 @@ refresh_token = "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
 
         let data = data_manager
             .load_instance(
-                (
+                &(
                     "http://example_instance.example".parse().unwrap(),
                     "example-account".parse().unwrap(),
                 )
@@ -204,7 +205,7 @@ refresh_token = "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
 
         data_manager
             .store_instance(
-                (
+                &(
                     "http://example_instance.example".parse().unwrap(),
                     "example-account".parse().unwrap(),
                 )
@@ -220,7 +221,12 @@ refresh_token = "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
 
     #[test]
     fn success_new() {
-        std::env::set_var("XDG_DATA_HOME", "/tmp/test/.local/share/");
+        #[allow(unsafe_code)]
+        unsafe {
+            // We only run this inside a single test, we just need to make sure
+            // that we don't set `XDG_DATA_HOME` anywhere else.
+            std::env::set_var("XDG_DATA_HOME", "/tmp/test/.local/share/");
+        }
         let config_manager = DataManager::new().unwrap();
         assert_eq!(
             config_manager.path,
