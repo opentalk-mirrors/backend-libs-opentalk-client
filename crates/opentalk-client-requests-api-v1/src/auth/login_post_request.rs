@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: EUPL-1.2
 
 use http_request_derive::HttpRequest;
-use opentalk_types_api_v1::auth::{login::AuthLoginPostRequestBody, PostLoginResponseBody};
+use opentalk_types_api_v1::auth::{PostLoginResponseBody, login::AuthLoginPostRequestBody};
 
 /// *POST* request on `/auth/login`
 #[derive(Clone, Debug, PartialEq, Eq, HttpRequest)]
@@ -23,7 +23,7 @@ mod test {
     use std::collections::BTreeSet;
 
     use httpmock::MockServer;
-    use opentalk_types_api_v1::auth::{login::AuthLoginPostRequestBody, PostLoginResponseBody};
+    use opentalk_types_api_v1::auth::{PostLoginResponseBody, login::AuthLoginPostRequestBody};
     use pretty_assertions::{assert_eq, assert_matches};
 
     use crate::{

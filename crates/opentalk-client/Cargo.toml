@@ -3,18 +3,25 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 [package]
-edition = "2021"
+edition = "2024"
 license = "EUPL-1.2"
 name = "opentalk-client"
 version = "0.1.0"
 
 [dependencies]
 anyhow.workspace = true
+async-trait.workspace = true
+bytes.workspace = true
+chrono.workspace = true
+http.workspace = true
 http-request-derive.workspace = true
 http-request-derive-client.workspace = true
 http-request-derive-client-reqwest.workspace = true
+oauth2.workspace = true
+opentalk-client-data-persistence.workspace = true
 opentalk-client-requests-api-v1.workspace = true
 opentalk-types-api-v1.workspace = true
 serde = { workspace = true, features = ["derive"] }
 snafu.workspace = true
+tokio = { workspace = true, features = ["macros", "rt"] }
 url = { workspace = true, features = ["serde"] }

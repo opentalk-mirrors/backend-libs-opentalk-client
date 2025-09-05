@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: EUPL-1.2
 
 use http_request_derive::HttpRequest;
-use opentalk_types_api_v1::users::{me::PatchMeRequestBody, PrivateUserProfile};
+use opentalk_types_api_v1::users::{PrivateUserProfile, me::PatchMeRequestBody};
 
 /// *PATCH* request on `/users/me`
 #[derive(Clone, Debug, PartialEq, Eq, HttpRequest)]
@@ -21,7 +21,7 @@ pub struct UsersMePatchRequest {
 #[cfg(test)]
 mod test {
     use httpmock::MockServer;
-    use opentalk_types_api_v1::users::{me::PatchMeRequestBody, PrivateUserProfile};
+    use opentalk_types_api_v1::users::{PrivateUserProfile, me::PatchMeRequestBody};
     use opentalk_types_common::{
         tariffs::TariffStatus,
         users::{DisplayName, Language, Theme, UserId, UserTitle},

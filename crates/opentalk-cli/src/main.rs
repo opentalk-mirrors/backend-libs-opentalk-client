@@ -4,13 +4,15 @@
 
 use std::collections::BTreeMap;
 
-use anyhow::Result;
+use anyhow::{Result, bail};
 use clap::Parser;
-use opentalk_client::Client;
+use opentalk_client::{Client, OidcDeviceAuthorization};
 use opentalk_client_data_persistence::{
-    ConfigManager, OpenTalkAccountConfig, OpenTalkAccountId, OpenTalkInstanceConfig,
+    ConfigManager, DataManager, OpenTalkAccountConfig, OpenTalkAccountId, OpenTalkInstanceConfig,
     OpenTalkInstanceId,
 };
+use opentalk_client_requests_api_v1::EventsGetRequest;
+use opentalk_types_api_v1::events::{EventExceptionResource, EventOrException, EventResource};
 use url::Url;
 
 #[derive(Debug, Parser)]
@@ -31,10 +33,23 @@ enum Command {
 
     /// Logout
     Logout {
-        instance_url: OpenTalkInstanceId,
-        account_id: OpenTalkAccountId,
+        #[arg(long)]
+        instance_url: Option<OpenTalkInstanceId>,
+
+        #[arg(long)]
+        account_id: Option<OpenTalkAccountId>,
     },
+    // List Accounts
     ListAccounts,
+
+    // List Events
+    ListEvents {
+        #[arg(long)]
+        instance_url: Option<OpenTalkInstanceId>,
+
+        #[arg(long)]
+        account_id: Option<OpenTalkAccountId>,
+    },
 }
 
 #[tokio::main]
@@ -61,6 +76,12 @@ async fn main() -> Result<()> {
         Command::ListAccounts => {
             list_accounts()?;
         }
+        Command::ListEvents {
+            instance_url,
+            account_id,
+        } => {
+            list_events(instance_url, account_id).await?;
+        }
     }
 
     Ok(())
@@ -74,10 +95,10 @@ async fn discover(client_url: Url) -> Result<()> {
 }
 
 fn list_accounts() -> Result<()> {
-    let conf_manager = ConfigManager::new()?;
-    let conf = conf_manager.load().unwrap_or_default();
+    let config_manager = ConfigManager::new()?;
+    let config = config_manager.load().unwrap_or_default();
 
-    conf.instances.iter().for_each(|instance| {
+    config.instances.iter().for_each(|instance| {
         println!("Instance: {}", **instance.0);
         println!(" {:<20} {:<20}", "Accounts:", "OIDC Device ID:");
         instance.1.accounts.iter().for_each(|account| {
@@ -89,44 +110,98 @@ fn list_accounts() -> Result<()> {
     Ok(())
 }
 
-fn logout(instance_url: OpenTalkInstanceId, account_id: OpenTalkAccountId) -> Result<()> {
-    let conf_manager = ConfigManager::new()?;
-    let mut conf = conf_manager.load().unwrap_or_default();
-
-    let instance = match conf.instances.get(&instance_url) {
-        Some(current_instance) => {
-            let mut tmp_instance = current_instance.clone();
-            tmp_instance.accounts.remove(&account_id.clone());
-            Some(tmp_instance)
-        }
-        None => None,
+async fn list_events(
+    instance_id: Option<OpenTalkInstanceId>,
+    account_id: Option<OpenTalkAccountId>,
+) -> Result<()> {
+    let config_manager = ConfigManager::new()?;
+    let config = config_manager.load().unwrap();
+    let Some((instance_account_id, account)) =
+        config.get_account_with_fallback_to_default(instance_id.as_ref(), account_id.as_ref())
+    else {
+        bail!("no account found");
     };
 
-    if let Some(instance_value) = instance {
-        if !instance_value.accounts.is_empty() {
-            conf.instances.insert(instance_url, instance_value);
-        } else {
-            conf.instances.remove(&instance_url);
+    let instance_id = instance_account_id.instance_id().clone();
+
+    let client = Client::discover(instance_id.into()).await?;
+    let oidc_endpoints = client.get_oidc_endpoints().await?;
+
+    let data_manager = DataManager::new()?;
+
+    let authorization = OidcDeviceAuthorization::load_from_datamanager(
+        data_manager,
+        account.oidc_client_id,
+        &instance_account_id,
+        oidc_endpoints,
+    )
+    .await?;
+
+    let response = client
+        .execute_authorized(EventsGetRequest, authorization)
+        .await?;
+
+    for item in response {
+        match item {
+            EventOrException::Event(EventResource {
+                id,
+                title,
+                description,
+                ..
+            }) => {
+                println!("Event {id}");
+                println!("  Title: {title}");
+                println!("  Description: {description}");
+            }
+            EventOrException::Exception(EventExceptionResource {
+                recurring_event_id,
+                instance_id,
+                ..
+            }) => {
+                println!("Exception {instance_id} for event {recurring_event_id}");
+            }
         }
     }
 
-    conf_manager.store(&conf)?;
+    Ok(())
+}
+
+fn logout(
+    instance_id: Option<OpenTalkInstanceId>,
+    account_id: Option<OpenTalkAccountId>,
+) -> Result<()> {
+    let config_manager = ConfigManager::new()?;
+    let mut config = config_manager.load().unwrap_or_default();
+
+    config.remove_account(instance_id.as_ref(), account_id.as_ref());
+
+    config_manager.store(&config)?;
 
     Ok(())
 }
 
 async fn login(
-    instance_url: OpenTalkInstanceId,
+    instance_id: OpenTalkInstanceId,
     account_id: OpenTalkAccountId,
     oidc_client_id: String,
 ) -> Result<()> {
-    let _client = Client::discover(instance_url.as_ref().clone()).await?;
-    // Perform oidc device auth
+    let data_manager = DataManager::new()?;
 
-    let conf_manager = ConfigManager::new()?;
-    let mut conf = conf_manager.load().unwrap_or_default();
+    let client = Client::discover(instance_id.clone().into()).await?;
+    let oidc_endpoints = client.get_oidc_endpoints().await?;
 
-    let instance = match conf.instances.get(&instance_url) {
+    let _authorization = OidcDeviceAuthorization::create_with_device_authorization(
+        data_manager,
+        oidc_endpoints,
+        oidc_client_id.clone(),
+        &(instance_id.clone(), account_id.clone()).into(),
+    )
+    .await?;
+
+    let config_manager = ConfigManager::new()?;
+    let mut config = config_manager.load().unwrap_or_default();
+
+    let instance = match config.instances.get(&instance_id) {
         Some(current_instance) => {
             let mut tmp_instance = current_instance.clone();
             tmp_instance.accounts.insert(
@@ -148,8 +223,14 @@ async fn login(
         },
     };
 
-    conf.instances.insert(instance_url, instance.clone());
-    conf_manager.store(&conf)?;
+    config
+        .instances
+        .insert(instance_id.clone(), instance.clone());
+    if config.default_instance.is_none() {
+        config.default_instance = Some(instance_id);
+    }
+
+    config_manager.store(&config)?;
 
     Ok(())
 }

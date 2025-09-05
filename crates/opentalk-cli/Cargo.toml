@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 [package]
-edition = "2021"
+edition = "2024"
 license = "EUPL-1.2"
 name = "opentalk-cli"
 version = "0.1.0"
@@ -13,5 +13,7 @@ anyhow.workspace = true
 clap = { workspace = true, features = ["derive"] }
 opentalk-client.workspace = true
 opentalk-client-data-persistence.workspace = true
+opentalk-client-requests-api-v1.workspace = true
+opentalk-types-api-v1.workspace = true
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 url = { workspace = true, features = ["serde"] }

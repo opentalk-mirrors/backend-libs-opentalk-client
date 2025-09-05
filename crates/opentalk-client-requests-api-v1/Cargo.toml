@@ -4,7 +4,7 @@
 
 [package]
 description = "Datatypes that describe requests to the endpoints of the OpenTalk v1 API to be used by clients"
-edition = "2021"
+edition = "2024"
 license = "EUPL-1.2"
 name = "opentalk-client-requests-api-v1"
 version = "0.1.0"

@@ -7,12 +7,12 @@ use std::{fs, path::PathBuf};
 use snafu::{OptionExt, ResultExt as _};
 
 use crate::{
+    ConfigError,
     config::Config,
     config_error::{
         FolderNotCreatableSnafu, NotLoadableSnafu, NotReadableSnafu, NotStorableSnafu,
         NotWriteableSnafu, SystemConfigHomeNotSetSnafu,
     },
-    ConfigError,
 };
 
 /// The [ConfigManager] stores and loads configs from providered pathes
@@ -70,9 +70,9 @@ mod tests {
 
     use super::Config;
     use crate::{
+        OpenTalkAccountConfig,
         config_manager::{ConfigError, ConfigManager},
         opentalk_instance_config::OpenTalkInstanceConfig,
-        OpenTalkAccountConfig,
     };
 
     const EXAMPLE_CONFIG: &str = r#"default_instance = "https://ot.example.com/"
@@ -145,9 +145,9 @@ oidc_client_id = "device"
         let config_manager = ConfigManager {
             path: config_path.clone(),
         };
-        let conf = config_manager.load().unwrap();
+        let config = config_manager.load().unwrap();
 
-        assert_eq!(Config::default(), conf);
+        assert_eq!(Config::default(), config);
     }
 
     #[test]
@@ -159,9 +159,9 @@ oidc_client_id = "device"
         let config_manager = ConfigManager {
             path: config_path.clone(),
         };
-        let conf = config_manager.load();
+        let config = config_manager.load();
 
-        assert_matches!(conf, Err(ConfigError::NotLoadable { path, source: _ }) if path == config_path);
+        assert_matches!(config, Err(ConfigError::NotLoadable { path, source: _ }) if path == config_path);
     }
 
     #[test]
@@ -177,9 +177,9 @@ oidc_client_id = "device"
         let config_manager = ConfigManager {
             path: config_path.clone(),
         };
-        let conf = config_manager.load().unwrap();
+        let config = config_manager.load().unwrap();
 
-        assert_eq!(example(), conf);
+        assert_eq!(example(), config);
     }
 
     #[test]
@@ -202,7 +202,12 @@ oidc_client_id = "device"
 
     #[test]
     fn success_new() {
-        std::env::set_var("XDG_CONFIG_HOME", "/home/example/.config");
+        #[allow(unsafe_code)]
+        unsafe {
+            // We only run this inside a single test, we just need to make sure
+            // that we don't set `XDG_CONFIG_HOME` anywhere else.
+            std::env::set_var("XDG_CONFIG_HOME", "/home/example/.config");
+        }
         let config_manager = ConfigManager::new().unwrap();
         assert_eq!(
             Path::new("/home/example/.config/opentalk/cli.toml"),

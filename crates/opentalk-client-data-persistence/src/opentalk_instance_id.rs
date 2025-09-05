@@ -20,6 +20,7 @@ use url::Url;
     derive_more::Deref,
     derive_more::From,
     derive_more::FromStr,
+    derive_more::Into,
 )]
 pub struct OpenTalkInstanceId(Url);
 

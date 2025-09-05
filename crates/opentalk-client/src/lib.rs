@@ -20,7 +20,13 @@
     unused_results
 )]
 
+mod authenticated_client;
+mod authorization;
 mod client;
 mod oidc;
+mod oidc_authorization;
 
+pub use authenticated_client::AuthenticatedClient;
+pub use authorization::Authorization;
 pub use client::Client;
+pub use oidc_authorization::OidcDeviceAuthorization;
