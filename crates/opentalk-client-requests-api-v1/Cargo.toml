@@ -3,11 +3,16 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 [package]
+authors.workspace = true
 description = "Datatypes that describe requests to the endpoints of the OpenTalk v1 API to be used by clients"
+documentation = "https://docs.rs/opentalk-cli"
 edition = "2024"
+homepage.workspace = true
 license = "EUPL-1.2"
 name = "opentalk-client-requests-api-v1"
-version = "0.1.0"
+publish = true
+repository.workspace = true
+version = "0.0.1-alpha"
 
 [dependencies]
 http-request-derive.workspace = true

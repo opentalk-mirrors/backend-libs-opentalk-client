@@ -3,10 +3,16 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 [package]
+authors.workspace = true
+description = "A command-line tool to interact with OpenTalk"
+documentation = "https://docs.rs/opentalk-cli"
 edition = "2024"
+homepage.workspace = true
 license = "EUPL-1.2"
 name = "opentalk-cli"
-version = "0.1.0"
+publish = true
+repository.workspace = true
+version = "0.0.1-alpha"
 
 [dependencies]
 anyhow.workspace = true
