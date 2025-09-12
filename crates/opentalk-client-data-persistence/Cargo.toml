@@ -15,12 +15,13 @@ repository.workspace = true
 version = "0.0.1-alpha"
 
 [dependencies]
-chrono.workspace = true
+chrono = { workspace = true, features = ["serde"] }
 derive_more = { workspace = true, features = [
   "as_ref",
   "deref",
   "from",
   "from_str",
+  "into",
 ] }
 dirs.workspace = true
 serde = { workspace = true, features = ["derive"] }
