@@ -27,7 +27,7 @@ http = "1.2.0"
 http-request-derive = "0.4.0"
 http-request-derive-client = "0.1.0"
 http-request-derive-client-reqwest = "0.2.0"
-httpmock = "0.7.0"
+httpmock = "0.8.0"
 oauth2 = { version = "5", features = ["reqwest-blocking"] }
 opentalk-types-api-v1 = "0.40.0"
 opentalk-types-common = "0.36.1"
