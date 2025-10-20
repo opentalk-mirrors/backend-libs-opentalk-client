@@ -1423,16 +1423,29 @@ dependencies = [
 ]
 
 [[package]]
-name = "opentalk-types-api-v1"
-version = "0.42.0"
+name = "opentalk-types-api-common"
+version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9d95c06f72a871a6f689e776790f4a3f4de4f96f4237224a558f35e14aee738a"
+checksum = "f20767d42b9f48f21d901901b066ac73bb17eeccc4545058a84bcc4a023602e5"
 dependencies = [
  "base64",
  "bincode",
+ "derive_more",
+ "opentalk-types-common",
+ "serde",
+ "snafu",
+]
+
+[[package]]
+name = "opentalk-types-api-v1"
+version = "0.43.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "28dd80ca01c50d8516bee802dbeb1ce0296aa314da3da994b97d2e5c3adf81e0"
+dependencies = [
  "chrono",
  "chrono-tz",
  "derive_more",
+ "opentalk-types-api-common",
  "opentalk-types-common",
  "serde",
  "serde_with",
@@ -1445,6 +1458,7 @@ version = "0.37.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b3dfa46cbc29e6e4ca2ec258e8cdc4d5520bf6077374ead31fdb4a6504e9c16f"
 dependencies = [
+ "bincode",
  "chrono",
  "chrono-tz",
  "derive_more",
