@@ -8,11 +8,11 @@
   ],
   "packageRules": [
     {
-      "matchPackagePatterns": [
-        "opentalk-*"
-      ],
       "groupName": "opentalk",
-      "groupSlug": "opentalk"
+      "groupSlug": "opentalk",
+      "matchPackageNames": [
+        "/opentalk-*/"
+      ]
     }
   ]
 }
