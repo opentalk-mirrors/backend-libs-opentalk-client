@@ -1030,10 +1030,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0cde2700ccaed3872079a65fb1a78f6c0a36c91570f28755dda67bc8f7d9f00a"
 dependencies = [
  "displaydoc",
- "litemap",
- "tinystr",
- "writeable",
+ "litemap 0.8.0",
+ "tinystr 0.8.1",
+ "writeable 0.6.1",
  "zerovec",
+]
+
+[[package]]
+name = "icu_locid"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "13acbb8371917fc971be86fc8057c41a64b521c184808a698c02acc242dbf637"
+dependencies = [
+ "displaydoc",
+ "litemap 0.7.5",
+ "serde",
+ "tinystr 0.7.6",
+ "writeable 0.5.5",
 ]
 
 [[package]]
@@ -1088,8 +1101,8 @@ dependencies = [
  "displaydoc",
  "icu_locale_core",
  "stable_deref_trait",
- "tinystr",
- "writeable",
+ "tinystr 0.8.1",
+ "writeable 0.6.1",
  "yoke",
  "zerofrom",
  "zerotrie",
@@ -1214,6 +1227,12 @@ name = "linux-raw-sys"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df1d3c3b53da64cf5760482273a98e575c651a67eec7f77df96b5b642de8f039"
+
+[[package]]
+name = "litemap"
+version = "0.7.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23fb14cb19457329c82206317a5663005a4d404783dc74f4252769b0d5f42856"
 
 [[package]]
 name = "litemap"
@@ -1434,9 +1453,9 @@ dependencies = [
 
 [[package]]
 name = "opentalk-types-api-common"
-version = "0.1.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f20767d42b9f48f21d901901b066ac73bb17eeccc4545058a84bcc4a023602e5"
+checksum = "93bc07ff7932e55499529a7a45c1fe2c54a1578920d3b7c399379781b05b2ef4"
 dependencies = [
  "base64",
  "bincode",
@@ -1448,9 +1467,9 @@ dependencies = [
 
 [[package]]
 name = "opentalk-types-api-v1"
-version = "0.43.0"
+version = "0.49.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28dd80ca01c50d8516bee802dbeb1ce0296aa314da3da994b97d2e5c3adf81e0"
+checksum = "eb8031bb6214e8e610b6ceb9bfb24b02d3b4952cdb519b66f37c5e55bd7eb4af"
 dependencies = [
  "chrono",
  "chrono-tz",
@@ -1464,15 +1483,16 @@ dependencies = [
 
 [[package]]
 name = "opentalk-types-common"
-version = "0.37.1"
+version = "0.41.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3dfa46cbc29e6e4ca2ec258e8cdc4d5520bf6077374ead31fdb4a6504e9c16f"
+checksum = "3829394448c205200cbc70d158cf347d31529c689bfcf5c2214ec3f9ca3e51d1"
 dependencies = [
  "bincode",
  "chrono",
  "chrono-tz",
  "derive_more",
  "email_address",
+ "icu_locid",
  "itertools",
  "opentalk-types-common-identifiers",
  "opentalk-types-common-macros",
@@ -2420,6 +2440,16 @@ dependencies = [
 
 [[package]]
 name = "tinystr"
+version = "0.7.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9117f5d4db391c1cf6927e7bea3db74b9a1c1add8f7eda9ffd5364f40f57b82f"
+dependencies = [
+ "displaydoc",
+ "serde",
+]
+
+[[package]]
+name = "tinystr"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5d4f6d1145dcb577acf783d4e601bc1d76a13337bb54e6233add580b07344c8b"
@@ -3121,6 +3151,12 @@ name = "wit-bindgen"
 version = "0.46.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f17a85883d4e6d00e8a97c586de764dabcc06133f7f1d55dce5cdc070ad7fe59"
+
+[[package]]
+name = "writeable"
+version = "0.5.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1e9df38ee2d2c3c5948ea468a8406ff0db0b29ae1ffde1bcf20ef305bcc95c51"
 
 [[package]]
 name = "writeable"
