@@ -12,9 +12,9 @@ homepage = "https://opentalk.eu/"
 repository = "https://gitlab.opencode.de/opentalk/libs/opentalk-client"
 
 [workspace.dependencies]
-opentalk-client = { path = "crates/opentalk-client", version = "0.0.1-alpha" }
-opentalk-client-data-persistence = { path = "crates/opentalk-client-data-persistence", version = "0.0.1-alpha" }
-opentalk-client-requests-api-v1 = { path = "crates/opentalk-client-requests-api-v1", version = "0.0.1-alpha" }
+opentalk-client = { path = "crates/opentalk-client", version = "0.0.1-alpha.2" }
+opentalk-client-data-persistence = { path = "crates/opentalk-client-data-persistence", version = "0.0.1-alpha.2" }
+opentalk-client-requests-api-v1 = { path = "crates/opentalk-client-requests-api-v1", version = "0.0.1-alpha.2" }
 
 anyhow = "1.0.97"
 async-trait = "0.1.88"
