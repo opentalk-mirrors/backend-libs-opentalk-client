@@ -6,7 +6,7 @@ use std::collections::BTreeMap;
 
 use anyhow::{Result, bail};
 use clap::Parser;
-use opentalk_client::{Client, OidcDeviceAuthorization};
+use opentalk_client::{Client, OidcDeviceAuthorization, OidcDirectAccessGrant};
 use opentalk_client_data_persistence::{
     ConfigManager, DataManager, OpenTalkAccountConfig, OpenTalkAccountId, OpenTalkInstanceConfig,
     OpenTalkInstanceId,
@@ -29,6 +29,15 @@ enum Command {
         instance_url: OpenTalkInstanceId,
         account_id: OpenTalkAccountId,
         oidc_client_id: String,
+    },
+
+    /// Login to a new OpenTalk instance
+    LoginWithPassword {
+        instance_url: OpenTalkInstanceId,
+        account_id: OpenTalkAccountId,
+        oidc_client_id: String,
+        oidc_user: String,
+        oidc_password: String,
     },
 
     /// Logout
@@ -66,6 +75,22 @@ async fn main() -> Result<()> {
             oidc_client_id,
         } => {
             login(instance_url, account_id, oidc_client_id).await?;
+        }
+        Command::LoginWithPassword {
+            instance_url,
+            account_id,
+            oidc_client_id,
+            oidc_user,
+            oidc_password,
+        } => {
+            login_with_password(
+                instance_url,
+                account_id,
+                oidc_client_id,
+                oidc_user,
+                oidc_password,
+            )
+            .await?;
         }
         Command::Logout {
             instance_url,
@@ -194,6 +219,65 @@ async fn login(
         data_manager,
         oidc_endpoints,
         oidc_client_id.clone(),
+        &(instance_id.clone(), account_id.clone()).into(),
+    )
+    .await?;
+
+    let config_manager = ConfigManager::new()?;
+    let mut config = config_manager.load().unwrap_or_default();
+
+    let instance = match config.instances.get(&instance_id) {
+        Some(current_instance) => {
+            let mut tmp_instance = current_instance.clone();
+            tmp_instance.accounts.insert(
+                account_id.clone(),
+                OpenTalkAccountConfig {
+                    oidc_client_id: oidc_client_id.clone(),
+                },
+            );
+            tmp_instance
+        }
+        None => OpenTalkInstanceConfig {
+            default_account: account_id.clone(),
+            accounts: BTreeMap::from_iter([(
+                account_id.clone(),
+                OpenTalkAccountConfig {
+                    oidc_client_id: oidc_client_id.clone(),
+                },
+            )]),
+        },
+    };
+
+    config
+        .instances
+        .insert(instance_id.clone(), instance.clone());
+    if config.default_instance.is_none() {
+        config.default_instance = Some(instance_id);
+    }
+
+    config_manager.store(&config)?;
+
+    Ok(())
+}
+
+async fn login_with_password(
+    instance_id: OpenTalkInstanceId,
+    account_id: OpenTalkAccountId,
+    oidc_client_id: String,
+    oidc_user: String,
+    oidc_password: String,
+) -> Result<()> {
+    let data_manager = DataManager::new()?;
+
+    let client = Client::discover(instance_id.clone().into()).await?;
+    let oidc_endpoints = client.get_oidc_endpoints().await?;
+
+    let _authorization = OidcDirectAccessGrant::create_with_direct_access_grant(
+        data_manager,
+        oidc_endpoints,
+        oidc_client_id.clone(),
+        oidc_user,
+        oidc_password.into(),
         &(instance_id.clone(), account_id.clone()).into(),
     )
     .await?;
