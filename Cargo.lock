@@ -1408,6 +1408,7 @@ dependencies = [
  "opentalk-client-data-persistence",
  "opentalk-client-requests-api-v1",
  "opentalk-types-api-v1",
+ "secrecy",
  "serde",
  "snafu",
  "tokio",
@@ -1994,6 +1995,15 @@ dependencies = [
  "ref-cast",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "secrecy"
+version = "0.10.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e891af845473308773346dc847b2c23ee78fe442e0472ac50e22a18a93d3ae5a"
+dependencies = [
+ "zeroize",
 ]
 
 [[package]]

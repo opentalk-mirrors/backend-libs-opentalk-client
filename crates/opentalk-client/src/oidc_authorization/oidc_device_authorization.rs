@@ -8,16 +8,11 @@ use anyhow::Result;
 use chrono::Utc;
 use oauth2::{
     AuthUrl, ClientId, DeviceAuthorizationUrl, RefreshToken, Scope,
-    StandardDeviceAuthorizationResponse, TokenResponse, TokenUrl,
-    basic::BasicClient,
-    reqwest::{self},
+    StandardDeviceAuthorizationResponse, TokenResponse, TokenUrl, basic::BasicClient, reqwest,
 };
 use opentalk_client_data_persistence::{AccountTokens, DataManager, OpenTalkInstanceAccountId};
 
-use crate::{Authorization, oidc::OidcEndpoints};
-
-#[allow(unused)]
-const REFRESH_BEFORE_EXPIRY: Duration = Duration::from_secs(10);
+use crate::{Authorization, oidc::OidcEndpoints, oidc_authorization::REFRESH_BEFORE_EXPIRY};
 
 /// TODO
 #[derive(Debug)]
