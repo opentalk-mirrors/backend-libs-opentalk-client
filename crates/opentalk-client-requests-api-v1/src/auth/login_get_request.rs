@@ -69,7 +69,7 @@ mod tests {
             Err(TestClientError::HttpRequestDerive {
                 source: http_request_derive::Error::NonSuccessStatus {
                     status: http::StatusCode::INTERNAL_SERVER_ERROR,
-                    data: _,
+                    body: _,
                 },
                 message: _,
             })

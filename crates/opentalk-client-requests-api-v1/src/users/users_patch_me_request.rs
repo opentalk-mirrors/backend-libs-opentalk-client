@@ -122,12 +122,9 @@ mod test {
                 .send_request(&server, UsersMePatchRequest { body: request_body })
                 .await,
             Err(TestClientError::HttpRequestDerive {
-                source: http_request_derive::Error::NonSuccessStatus {
-                    status: http::StatusCode::INTERNAL_SERVER_ERROR,
-                    data: _,
-                },
+                source,
                 message: _,
-            })
+            }) if source.is_internal_server_error()
         );
 
         mock.assert();
@@ -175,12 +172,9 @@ mod test {
                 .send_request(&server, UsersMePatchRequest { body: request_body })
                 .await,
             Err(TestClientError::HttpRequestDerive {
-                source: http_request_derive::Error::NonSuccessStatus {
-                    status: http::StatusCode::BAD_REQUEST,
-                    data: _,
-                },
+                source,
                 message: _,
-            })
+            }) if source.is_bad_request()
         );
 
         mock.assert();
@@ -228,9 +222,9 @@ mod test {
                 .send_request(&server, UsersMePatchRequest { body: request_body })
                 .await,
             Err(TestClientError::HttpRequestDerive {
-                source: http_request_derive::Error::Unauthorized,
+                source,
                 message: _,
-            })
+            }) if source.is_unauthorized()
         );
 
         mock.assert();

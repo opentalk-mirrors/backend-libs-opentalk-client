@@ -64,6 +64,7 @@ enum Command {
 #[tokio::main]
 async fn main() -> Result<()> {
     let command = Command::parse();
+    env_logger::init();
 
     match command {
         Command::Discover { client_url } => {

@@ -2,14 +2,14 @@
 //
 // SPDX-License-Identifier: EUPL-1.2
 
-use anyhow::Result;
+use anyhow::{Result, bail};
+use bytes::Bytes;
 use http_request_derive::HttpRequest;
 use http_request_derive_client::Client as _;
 use http_request_derive_client_reqwest::{ReqwestClient, ReqwestClientError};
 use opentalk_client_requests_api_v1::auth::LoginGetRequest;
 use opentalk_types_api_v1::auth::{GetLoginResponseBody, OidcProvider};
 use serde::{Deserialize, Serialize};
-use snafu::{ResultExt as _, Snafu};
 use url::Url;
 
 use crate::{
@@ -17,10 +17,12 @@ use crate::{
     oidc::{OidcEndpoints, OidcWellKnownRequest},
 };
 
+/* TODO: make available again
 #[derive(Debug, Snafu)]
 pub enum ClientError {
     HttpRequestDeriveClient { source: ReqwestClientError },
 }
+*/
 
 /// A client for interfacing with the OpenTalk API.
 #[derive(Debug)]
@@ -29,22 +31,52 @@ pub struct Client {
     #[allow(unused)]
     oidc_url: Url,
     #[allow(unused)]
-    base_url: Url,
+    api_url: Url,
 }
 
 impl Client {
-    /// Discover the OpenTalk API information based on the frontend URL.
+    /// Discover the OpenTalk API information based on the frontend or controller api URL.
     pub async fn discover(url: Url) -> Result<Self> {
-        let discovery_client = ReqwestClient::new(url);
-        let ClientWellKnownBody {
-            opentalk_controller: ControllerBaseInfo { mut base_url },
-        }: ClientWellKnownBody = discovery_client
-            .execute(WellKnownRequest)
-            .await
-            .context(HttpRequestDeriveClientSnafu)?;
+        let discovery_client = ReqwestClient::new(url.clone());
 
-        _ = base_url.path_segments_mut().unwrap().push("v1");
-        let inner = ReqwestClient::new(base_url.clone());
+        match discovery_client.execute(WellKnownFrontendRequest).await? {
+            WellKnownFrontendResponse::Found(WellKnownFrontendBody {
+                opentalk_controller: ControllerBaseInfo { base_url },
+            }) => Self::discover_controller(base_url).await,
+            WellKnownFrontendResponse::NotFound => Self::discover_controller(url).await,
+        }
+    }
+
+    /// Discover the OpenTalk API information based on the controller api URL.
+    pub async fn discover_controller(url: Url) -> Result<Self> {
+        let discovery_client = ReqwestClient::new(url.clone());
+
+        let WellKnownApiBody {
+            opentalk_api: ApiInfo { v1 },
+        } = discovery_client.execute(WellKnownApiRequest).await?;
+
+        let Some(VersionedApiInfo { base_url }) = v1 else {
+            bail!(
+                "No compatible API version found under the well-known API endpoint {url}. This client is compatible with API v1."
+            );
+        };
+
+        let api_url = match Url::parse(&base_url) {
+            Ok(url) if url.cannot_be_a_base() => {
+                bail!(
+                    "Discovered url {url} which cannot be a base and therefore is not a valid controller API url"
+                );
+            }
+            Ok(url) => url,
+            Err(_e) => {
+                let segments = base_url.trim_start_matches('/');
+                let mut url = url;
+                _ = url.path_segments_mut().unwrap().push(segments);
+                url
+            }
+        };
+
+        let inner = ReqwestClient::new(api_url.clone());
 
         let GetLoginResponseBody { oidc } = inner.execute(LoginGetRequest).await?;
 
@@ -52,7 +84,7 @@ impl Client {
 
         Ok(Self {
             oidc_url,
-            base_url,
+            api_url,
             inner,
         })
     }
@@ -92,15 +124,56 @@ impl Client {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, HttpRequest)]
-#[http_request(method="GET",response = ClientWellKnownBody,path=".well-known/opentalk/client")]
-struct WellKnownRequest;
+#[http_request(method="GET", response = WellKnownFrontendResponse, path=".well-known/opentalk/client")]
+struct WellKnownFrontendRequest;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 struct ControllerBaseInfo {
-    base_url: Url,
+    pub base_url: Url,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-struct ClientWellKnownBody {
-    opentalk_controller: ControllerBaseInfo,
+struct WellKnownFrontendBody {
+    pub opentalk_controller: ControllerBaseInfo,
+}
+
+enum WellKnownFrontendResponse {
+    NotFound,
+    Found(WellKnownFrontendBody),
+}
+
+impl http_request_derive::FromHttpResponse for WellKnownFrontendResponse {
+    fn from_http_response(
+        http_response: http::Response<Bytes>,
+    ) -> Result<Self, http_request_derive::Error>
+    where
+        Self: Sized,
+    {
+        match <WellKnownFrontendBody as http_request_derive::FromHttpResponse>::from_http_response(
+            http_response,
+        ) {
+            Ok(body) => Ok(Self::Found(body)),
+            Err(e) if e.is_not_found() => Ok(Self::NotFound),
+            Err(e) => Err(e),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, HttpRequest)]
+#[http_request(method="GET", response = WellKnownApiBody, path=".well-known/opentalk/api")]
+struct WellKnownApiRequest;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+struct VersionedApiInfo {
+    pub base_url: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+struct ApiInfo {
+    pub v1: Option<VersionedApiInfo>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+struct WellKnownApiBody {
+    pub opentalk_api: ApiInfo,
 }
