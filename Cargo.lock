@@ -1426,7 +1426,7 @@ dependencies = [
 
 [[package]]
 name = "opentalk-cli"
-version = "0.0.1-alpha.2"
+version = "0.0.1-alpha.3"
 dependencies = [
  "anyhow",
  "clap",
@@ -1441,7 +1441,7 @@ dependencies = [
 
 [[package]]
 name = "opentalk-client"
-version = "0.0.1-alpha.2"
+version = "0.0.1-alpha.3"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1463,7 +1463,7 @@ dependencies = [
 
 [[package]]
 name = "opentalk-client-data-persistence"
-version = "0.0.1-alpha.2"
+version = "0.0.1-alpha.3"
 dependencies = [
  "chrono",
  "derive_more",
@@ -1479,7 +1479,7 @@ dependencies = [
 
 [[package]]
 name = "opentalk-client-requests-api-v1"
-version = "0.0.1-alpha.2"
+version = "0.0.1-alpha.3"
 dependencies = [
  "chrono",
  "http",
