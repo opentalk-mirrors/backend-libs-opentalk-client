@@ -90,7 +90,7 @@ mod test {
             Err(TestClientError::HttpRequestDerive {
                 source: http_request_derive::Error::NonSuccessStatus {
                     status: http::StatusCode::INTERNAL_SERVER_ERROR,
-                    data: _,
+                    body: _,
                 },
                 message: _,
             })
@@ -127,7 +127,7 @@ mod test {
             Err(TestClientError::HttpRequestDerive {
                 source: http_request_derive::Error::NonSuccessStatus {
                     status: http::StatusCode::BAD_REQUEST,
-                    data: _,
+                    body: _,
                 },
                 message: _,
             })
@@ -162,9 +162,9 @@ mod test {
                 .send_request(&server, LoginPostRequest { body: request_body })
                 .await,
             Err(TestClientError::HttpRequestDerive {
-                source: http_request_derive::Error::Unauthorized,
+                source,
                 message: _,
-            })
+            }) if source.is_unauthorized()
         );
 
         mock.assert();
