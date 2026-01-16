@@ -15,15 +15,16 @@ repository.workspace = true
 version = "0.0.1-alpha.3"
 
 [dependencies]
+bytes.workspace = true
+http.workspace = true
 http-request-derive.workspace = true
 opentalk-types-api-v1 = { workspace = true, features = ["serde"] }
 opentalk-types-common = { workspace = true, features = ["serde"] }
+snafu.workspace = true
 
 [dev-dependencies]
 chrono.workspace = true
-http.workspace = true
 httpmock.workspace = true
 pretty_assertions = { workspace = true, features = ["unstable"] }
 reqwest = { workspace = true, features = ["json"] }
-snafu.workspace = true
 tokio = { workspace = true, features = ["macros", "rt"] }

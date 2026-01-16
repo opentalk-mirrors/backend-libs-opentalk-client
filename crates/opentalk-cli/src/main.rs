@@ -165,7 +165,8 @@ async fn list_events(
 
     let response = client
         .execute_authorized(EventsGetRequest, authorization)
-        .await?;
+        .await?
+        .into_inner()?;
 
     for item in response {
         match item {

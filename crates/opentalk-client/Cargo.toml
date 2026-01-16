@@ -23,11 +23,13 @@ http.workspace = true
 http-request-derive.workspace = true
 http-request-derive-client.workspace = true
 http-request-derive-client-reqwest.workspace = true
+itertools.workspace = true
 oauth2.workspace = true
 opentalk-client-data-persistence.workspace = true
 opentalk-client-requests-api-v1.workspace = true
 opentalk-types-api-v1.workspace = true
 secrecy.workspace = true
 serde = { workspace = true, features = ["derive"] }
+snafu.workspace = true
 tokio = { workspace = true, features = ["macros", "rt"] }
 url = { workspace = true, features = ["serde"] }

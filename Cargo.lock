@@ -1451,12 +1451,14 @@ dependencies = [
  "http-request-derive",
  "http-request-derive-client",
  "http-request-derive-client-reqwest",
+ "itertools",
  "oauth2",
  "opentalk-client-data-persistence",
  "opentalk-client-requests-api-v1",
  "opentalk-types-api-v1",
  "secrecy",
  "serde",
+ "snafu",
  "tokio",
  "url",
 ]
@@ -1481,6 +1483,7 @@ dependencies = [
 name = "opentalk-client-requests-api-v1"
 version = "0.0.1-alpha.3"
 dependencies = [
+ "bytes",
  "chrono",
  "http",
  "http-request-derive",
