@@ -22,6 +22,7 @@
 
 pub mod auth;
 pub mod events;
+pub mod response;
 pub mod users;
 
 pub use events::EventsGetRequest;

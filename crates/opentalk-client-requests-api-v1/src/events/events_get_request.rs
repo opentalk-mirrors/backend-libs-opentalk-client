@@ -5,7 +5,9 @@
 use http_request_derive::HttpRequest;
 use opentalk_types_api_v1::events::EventOrException;
 
-type Response = Vec<EventOrException>;
+use crate::response::ApiResponse;
+
+type Response = ApiResponse<Vec<EventOrException>>;
 
 /// *GET* request on `/events`
 #[derive(Clone, Debug, PartialEq, Eq, Hash, HttpRequest)]

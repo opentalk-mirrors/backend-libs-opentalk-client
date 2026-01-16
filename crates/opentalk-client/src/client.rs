@@ -2,14 +2,15 @@
 //
 // SPDX-License-Identifier: EUPL-1.2
 
-use anyhow::{Result, bail};
 use bytes::Bytes;
 use http_request_derive::HttpRequest;
 use http_request_derive_client::Client as _;
 use http_request_derive_client_reqwest::{ReqwestClient, ReqwestClientError};
-use opentalk_client_requests_api_v1::auth::LoginGetRequest;
+use itertools::Itertools as _;
+use opentalk_client_requests_api_v1::{auth::LoginGetRequest, response::ApiError};
 use opentalk_types_api_v1::auth::{GetLoginResponseBody, OidcProvider};
 use serde::{Deserialize, Serialize};
+use snafu::{ResultExt as _, Snafu, ensure};
 use url::Url;
 
 use crate::{
@@ -17,12 +18,35 @@ use crate::{
     oidc::{OidcEndpoints, OidcWellKnownRequest},
 };
 
-/* TODO: make available again
+const COMPATIBLE_VERSIONS: &[&str] = &["v1"];
+
 #[derive(Debug, Snafu)]
 pub enum ClientError {
-    HttpRequestDeriveClient { source: ReqwestClientError },
+    #[snafu(display("Reqwest returned an error"))]
+    Reqwest { source: ReqwestClientError },
+
+    #[snafu(display("The API server returned an error"))]
+    Api { source: ApiError },
+
+    #[snafu(display(
+        "No compatible API version found under the well-known API endpoint {url}. This client is compatible with API versions: {compatible_versions}."
+    ))]
+    NoCompatibleApiVersion {
+        url: Url,
+        compatible_versions: String,
+    },
+
+    #[snafu(display("Invalid OIDC url found: {url:?}"))]
+    InvalidOidcUrl {
+        url: String,
+        source: url::ParseError,
+    },
+
+    #[snafu(display(
+        "Discovered url {url} which cannot be a base and therefore is not a valid controller API url"
+    ))]
+    InvalidUrlDiscovered { url: Url },
 }
-*/
 
 /// A client for interfacing with the OpenTalk API.
 #[derive(Debug)]
@@ -36,10 +60,14 @@ pub struct Client {
 
 impl Client {
     /// Discover the OpenTalk API information based on the frontend or controller api URL.
-    pub async fn discover(url: Url) -> Result<Self> {
+    pub async fn discover(url: Url) -> Result<Self, ClientError> {
         let discovery_client = ReqwestClient::new(url.clone());
 
-        match discovery_client.execute(WellKnownFrontendRequest).await? {
+        match discovery_client
+            .execute(WellKnownFrontendRequest)
+            .await
+            .context(ReqwestSnafu)?
+        {
             WellKnownFrontendResponse::Found(WellKnownFrontendBody {
                 opentalk_controller: ControllerBaseInfo { base_url },
             }) => Self::discover_controller(base_url).await,
@@ -48,26 +76,29 @@ impl Client {
     }
 
     /// Discover the OpenTalk API information based on the controller api URL.
-    pub async fn discover_controller(url: Url) -> Result<Self> {
+    pub async fn discover_controller(url: Url) -> Result<Self, ClientError> {
         let discovery_client = ReqwestClient::new(url.clone());
 
         let WellKnownApiBody {
             opentalk_api: ApiInfo { v1 },
-        } = discovery_client.execute(WellKnownApiRequest).await?;
+        } = discovery_client
+            .execute(WellKnownApiRequest)
+            .await
+            .context(ReqwestSnafu)?;
 
         let Some(VersionedApiInfo { base_url }) = v1 else {
-            bail!(
-                "No compatible API version found under the well-known API endpoint {url}. This client is compatible with API v1."
-            );
+            return NoCompatibleApiVersionSnafu {
+                url,
+                compatible_versions: COMPATIBLE_VERSIONS.iter().join(", "),
+            }
+            .fail();
         };
 
         let api_url = match Url::parse(&base_url) {
-            Ok(url) if url.cannot_be_a_base() => {
-                bail!(
-                    "Discovered url {url} which cannot be a base and therefore is not a valid controller API url"
-                );
+            Ok(url) => {
+                ensure!(!url.cannot_be_a_base(), InvalidUrlDiscoveredSnafu { url });
+                url
             }
-            Ok(url) => url,
             Err(_e) => {
                 let segments = base_url.trim_start_matches('/');
                 let mut url = url;
@@ -78,9 +109,13 @@ impl Client {
 
         let inner = ReqwestClient::new(api_url.clone());
 
-        let GetLoginResponseBody { oidc } = inner.execute(LoginGetRequest).await?;
+        let GetLoginResponseBody { oidc } =
+            inner.execute(LoginGetRequest).await.context(ReqwestSnafu)?;
 
-        let oidc_url = oidc.url.parse()?;
+        let oidc_url = oidc
+            .url
+            .parse()
+            .context(InvalidOidcUrlSnafu { url: oidc.url })?;
 
         Ok(Self {
             oidc_url,
@@ -90,15 +125,22 @@ impl Client {
     }
 
     /// Get the oidc endpoints from the OIDC provider.
-    pub async fn get_oidc_endpoints(&self) -> Result<OidcEndpoints> {
+    pub async fn get_oidc_endpoints(&self) -> Result<OidcEndpoints, ClientError> {
         let oidc_client = ReqwestClient::new(self.oidc_url.clone());
-        let oidc_endpoints = oidc_client.execute(OidcWellKnownRequest).await?;
+        let oidc_endpoints = oidc_client
+            .execute(OidcWellKnownRequest)
+            .await
+            .context(ReqwestSnafu)?;
         Ok(oidc_endpoints)
     }
 
     /// Query the OIDC provider information from the OpenTalk API
-    pub async fn get_oidc_provider(&self) -> Result<OidcProvider> {
-        let GetLoginResponseBody { oidc } = self.inner.execute(LoginGetRequest).await?;
+    pub async fn get_oidc_provider(&self) -> Result<OidcProvider, ClientError> {
+        let GetLoginResponseBody { oidc } = self
+            .inner
+            .execute(LoginGetRequest)
+            .await
+            .context(ReqwestSnafu)?;
         Ok(oidc)
     }
 
