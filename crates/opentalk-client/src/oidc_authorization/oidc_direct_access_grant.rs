@@ -32,6 +32,13 @@ impl Authorization for OidcDirectAccessGrant {
     }
 }
 
+#[async_trait::async_trait]
+impl Authorization for &OidcDirectAccessGrant {
+    async fn get_access_token(&self) -> Result<String> {
+        Authorization::get_access_token(*self).await
+    }
+}
+
 impl OidcDirectAccessGrant {
     /// Loads accesss token and calls refresh if needed
     pub async fn get_token_and_refresh_if_needed(
