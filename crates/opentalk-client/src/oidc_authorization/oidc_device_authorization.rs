@@ -31,6 +31,13 @@ impl Authorization for OidcDeviceAuthorization {
     }
 }
 
+#[async_trait::async_trait]
+impl Authorization for &OidcDeviceAuthorization {
+    async fn get_access_token(&self) -> Result<String> {
+        Authorization::get_access_token(*self).await
+    }
+}
+
 impl OidcDeviceAuthorization {
     /// TODO
     pub async fn load_from_datamanager(

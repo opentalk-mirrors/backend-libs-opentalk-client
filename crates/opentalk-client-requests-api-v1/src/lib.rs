@@ -25,10 +25,12 @@ pub mod events;
 pub mod response;
 pub mod users;
 
-pub use events::EventsGetRequest;
+pub use events::{EventsGetRequest, EventsInvitesPostRequest, EventsPostRequest};
 pub use users::{
     UsersFindGetRequest, UsersMeAssetsGetRequest, UsersMeGetRequest, UsersMePatchRequest,
 };
+
+pub mod common;
 
 #[cfg(test)]
 mod test_client;
