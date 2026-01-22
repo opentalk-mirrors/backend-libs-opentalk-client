@@ -49,7 +49,7 @@ pub enum ClientError {
 }
 
 /// A client for interfacing with the OpenTalk API.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Client {
     inner: ReqwestClient,
     #[allow(unused)]
