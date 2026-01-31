@@ -34,6 +34,7 @@ pub enum ApiError {
     },
 
     /// The API returned an other non-successful HTTP status code
+    #[snafu(display("Received non-successful HTTP status code {code}"))]
     NonSuccessfulStatusCode {
         /// The non-success status code returned in the response
         code: StatusCode,
