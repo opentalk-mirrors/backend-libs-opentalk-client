@@ -20,32 +20,74 @@ use crate::{
 
 const COMPATIBLE_VERSIONS: &[&str] = &["v1"];
 
+/// The error that can result from requests sent by the client.
 #[derive(Debug, Snafu)]
 pub enum ClientError {
+    /// The `http_request_derive` library `reqwest` integration returned an error.
+    ///
+    /// These are usually errors caused by either functionality in the
+    /// `reqwest` crate, or when handling the data returned from `reqwest`.
+    ///
+    /// They don't indicate a non-successful HTTP status code, that is indicated
+    /// by the [`ClientError::Api`] variant.
     #[snafu(display("Reqwest returned an error"))]
-    Reqwest { source: ReqwestClientError },
+    Reqwest {
+        /// The source error.
+        source: ReqwestClientError,
+    },
 
+    /// The API returned an HTTP response with an HTTP status code which is
+    /// considered non-successful.
     #[snafu(display("The API server returned an error"))]
-    Api { source: ApiError },
+    Api {
+        /// The source error.
+        source: ApiError,
+    },
 
+    /// No compatible API version found under the well-known API endpoint.
     #[snafu(display(
         "No compatible API version found under the well-known API endpoint {url}. This client is compatible with API versions: {compatible_versions}."
     ))]
     NoCompatibleApiVersion {
+        /// The URL under which the API endpint was looked up.
         url: Url,
+
+        /// The list of compatible API versions supported by this client implementation.
         compatible_versions: String,
     },
 
+    /// The OpenTalk API returned an invalid OIDC URL.
     #[snafu(display("Invalid OIDC url found: {url:?}"))]
     InvalidOidcUrl {
+        /// The URL that was returned from the API.
         url: String,
+
+        /// The error that was encountered when attempting to parse the URL.
         source: url::ParseError,
     },
 
+    /// The OpenTalk API returned an OIDC URL which cannot be a base and is therefore invalid for usage in OIDC.
+    ///
+    /// This happens e.g. for `data:` URLs.
     #[snafu(display(
         "Discovered url {url} which cannot be a base and therefore is not a valid controller API url"
     ))]
-    InvalidUrlDiscovered { url: Url },
+    InvalidUrlDiscovered {
+        /// The invalid URL
+        url: Url,
+    },
+}
+
+impl From<ReqwestClientError> for ClientError {
+    fn from(source: ReqwestClientError) -> Self {
+        Self::Reqwest { source }
+    }
+}
+
+impl From<ApiError> for ClientError {
+    fn from(source: ApiError) -> Self {
+        Self::Api { source }
+    }
 }
 
 /// A client for interfacing with the OpenTalk API.
