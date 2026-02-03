@@ -8,7 +8,7 @@ use anyhow::Result;
 use chrono::Utc;
 use oauth2::{
     AuthUrl, ClientId, DeviceAuthorizationUrl, RefreshToken, Scope,
-    StandardDeviceAuthorizationResponse, TokenResponse, TokenUrl, basic::BasicClient, reqwest,
+    StandardDeviceAuthorizationResponse, TokenResponse, TokenUrl, basic::BasicClient,
 };
 use opentalk_client_data_persistence::{AccountTokens, DataManager, OpenTalkInstanceAccountId};
 
@@ -72,6 +72,7 @@ impl OidcDeviceAuthorization {
             .redirect(reqwest::redirect::Policy::none())
             .build()
             .expect("Client should build");
+        let http_client = super::ClientWrapper(http_client);
 
         let response = client
             .exchange_refresh_token(&RefreshToken::new(refresh_token))
@@ -140,6 +141,7 @@ impl OidcDeviceAuthorization {
             .redirect(reqwest::redirect::Policy::none())
             .build()
             .expect("Client should build");
+        let http_client = super::ClientWrapper(http_client);
 
         let pull_client = oidc_client.clone();
 

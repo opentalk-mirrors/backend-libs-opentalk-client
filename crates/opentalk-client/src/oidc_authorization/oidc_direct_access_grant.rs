@@ -8,7 +8,7 @@ use anyhow::Result;
 use chrono::Utc;
 use oauth2::{
     AuthUrl, ClientId, RefreshToken, ResourceOwnerPassword, ResourceOwnerUsername, Scope,
-    TokenResponse as _, TokenUrl, basic::BasicClient, reqwest,
+    TokenResponse as _, TokenUrl, basic::BasicClient,
 };
 use opentalk_client_data_persistence::{AccountTokens, DataManager, OpenTalkInstanceAccountId};
 use secrecy::{ExposeSecret, SecretString};
@@ -75,6 +75,7 @@ impl OidcDirectAccessGrant {
             .redirect(reqwest::redirect::Policy::none())
             .build()
             .expect("Client should build");
+        let http_client = super::ClientWrapper(http_client);
 
         let response = client
             .exchange_refresh_token(&RefreshToken::new(refresh_token))
@@ -113,6 +114,7 @@ impl OidcDirectAccessGrant {
             .redirect(reqwest::redirect::Policy::none())
             .build()
             .expect("Client should build");
+        let http_client = super::ClientWrapper(http_client);
 
         let token_result = oidc_client
             .exchange_password(
