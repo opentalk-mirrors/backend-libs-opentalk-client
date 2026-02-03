@@ -72,4 +72,36 @@ impl ApiError {
             _ => Err(http_response),
         }
     }
+
+    /// Query whether the error is caused by a specific HTTP status code.
+    pub const fn is_http_status_code(&self, expected_code: StatusCode) -> bool {
+        let c = expected_code.as_u16();
+        match self {
+            ApiError::Unauthorized { .. } => c == StatusCode::UNAUTHORIZED.as_u16(),
+            ApiError::Forbidden { .. } => c == StatusCode::FORBIDDEN.as_u16(),
+            ApiError::NotFound { .. } => c == StatusCode::NOT_FOUND.as_u16(),
+            ApiError::InternalServerError { .. } => c == StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
+            ApiError::NonSuccessfulStatusCode { code, .. } => c == code.as_u16(),
+        }
+    }
+
+    /// Query whether the error is caused by a 401 UNAUTHORIZED HTTP status code
+    pub const fn is_unauthorized(&self) -> bool {
+        self.is_http_status_code(StatusCode::UNAUTHORIZED)
+    }
+
+    /// Query whether the error is caused by a 403 FORBIDDEN HTTP status code
+    pub const fn is_forbidden(&self) -> bool {
+        self.is_http_status_code(StatusCode::FORBIDDEN)
+    }
+
+    /// Query whether the error is caused by a 404 NOT FOUND HTTP status code
+    pub const fn is_not_found(&self) -> bool {
+        self.is_http_status_code(StatusCode::NOT_FOUND)
+    }
+
+    /// Query whether the error is caused by a 500 INTERNAL SERVER ERROR HTTP status code
+    pub const fn is_internal_server_error(&self) -> bool {
+        self.is_http_status_code(StatusCode::INTERNAL_SERVER_ERROR)
+    }
 }
