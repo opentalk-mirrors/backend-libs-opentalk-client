@@ -12,7 +12,7 @@ license = "EUPL-1.2"
 name = "opentalk-client-requests-api-v1"
 publish = true
 repository.workspace = true
-version = "0.0.1-alpha.7"
+version = "0.0.1-alpha.8"
 
 [dependencies]
 bytes.workspace = true
