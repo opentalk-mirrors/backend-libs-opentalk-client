@@ -26,8 +26,8 @@ impl<C, A> AuthenticatedClient<C, A> {
     }
 }
 
-#[async_trait::async_trait]
-impl<C: http_request_derive_client::Client + Sync, A: Authorization + Sync>
+#[async_trait::async_trait(?Send)]
+impl<C: http_request_derive_client::Client, A: Authorization + Sync>
     http_request_derive_client::Client for AuthenticatedClient<C, A>
 {
     /// An error that can be returned during request execution by the [`AuthenticatedClient`].

@@ -23,7 +23,7 @@ pub struct OidcDeviceAuthorization {
     oidc_client_id: String,
 }
 
-#[async_trait::async_trait]
+#[async_trait::async_trait(?Send)]
 impl Authorization for OidcDeviceAuthorization {
     async fn get_access_token(&self) -> Result<String> {
         self.get_token_and_refresh_if_needed(REFRESH_BEFORE_EXPIRY)
@@ -31,7 +31,7 @@ impl Authorization for OidcDeviceAuthorization {
     }
 }
 
-#[async_trait::async_trait]
+#[async_trait::async_trait(?Send)]
 impl Authorization for &OidcDeviceAuthorization {
     async fn get_access_token(&self) -> Result<String> {
         Authorization::get_access_token(*self).await

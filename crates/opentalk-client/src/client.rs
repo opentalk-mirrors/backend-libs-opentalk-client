@@ -6,6 +6,7 @@ use bytes::Bytes;
 use http_request_derive::HttpRequest;
 use http_request_derive_client::Client as _;
 use http_request_derive_client_reqwest::{ReqwestClient, ReqwestClientError};
+use http_request_derive_logging::HttpLogger;
 use itertools::Itertools as _;
 use opentalk_client_requests_api_v1::{auth::LoginGetRequest, response::ApiError};
 use opentalk_types_api_v1::auth::{GetLoginResponseBody, OidcProvider};
@@ -101,36 +102,62 @@ pub struct Client {
 }
 
 impl Client {
-    /// Discover the OpenTalk API information based on the frontend or controller api URL.
+    /// Discover the OpenTalk API information based on the frontend or controller API URL.
     pub async fn discover(url: Url) -> Result<Self, ClientError> {
-        let discovery_client = ReqwestClient::new(url.clone());
+        Self::discover_inner(ReqwestClient::new(url)).await
+    }
 
-        match discovery_client
+    /// Discover the OpenTalk API information based on the frontend or controller API URL.
+    ///
+    /// When using this function for discovery, the logger will be informed about all requests
+    /// performed by this [`Client`].
+    pub async fn discover_with_logger(url: Url, logger: HttpLogger) -> Result<Self, ClientError> {
+        Self::discover_inner(ReqwestClient::new(url).with_logger(logger)).await
+    }
+
+    async fn discover_inner(mut client: ReqwestClient) -> Result<Self, ClientError> {
+        match client
             .execute(WellKnownFrontendRequest)
             .await
             .context(ReqwestSnafu)?
         {
             WellKnownFrontendResponse::Found(WellKnownFrontendBody {
                 opentalk_controller: ControllerBaseInfo { base_url },
-            }) => Self::discover_controller(base_url).await,
-            WellKnownFrontendResponse::NotFound => Self::discover_controller(url).await,
-        }
+            }) => {
+                client.set_base_url(base_url);
+            }
+            WellKnownFrontendResponse::NotFound => {}
+        };
+        Self::discover_controller_inner(client).await
     }
 
-    /// Discover the OpenTalk API information based on the controller api URL.
+    /// Discover the OpenTalk API information based on the controller API URL.
     pub async fn discover_controller(url: Url) -> Result<Self, ClientError> {
-        let discovery_client = ReqwestClient::new(url.clone());
+        Self::discover_controller_inner(ReqwestClient::new(url)).await
+    }
 
+    /// Discover the OpenTalk API information based on the controller API URL.
+    ///
+    /// When using this function for discovery, the logger will be informed about all requests
+    /// performed by this [`Client`].
+    pub async fn discover_controller_with_logger(
+        url: Url,
+        logger: HttpLogger,
+    ) -> Result<Self, ClientError> {
+        Self::discover_controller_inner(ReqwestClient::new(url).with_logger(logger)).await
+    }
+
+    async fn discover_controller_inner(mut client: ReqwestClient) -> Result<Self, ClientError> {
         let WellKnownApiBody {
             opentalk_api: ApiInfo { v1 },
-        } = discovery_client
+        } = client
             .execute(WellKnownApiRequest)
             .await
             .context(ReqwestSnafu)?;
 
         let Some(VersionedApiInfo { base_url }) = v1 else {
             return NoCompatibleApiVersionSnafu {
-                url,
+                url: client.base_url().clone(),
                 compatible_versions: COMPATIBLE_VERSIONS.iter().join(", "),
             }
             .fail();
@@ -143,16 +170,19 @@ impl Client {
             }
             Err(_e) => {
                 let segments = base_url.trim_start_matches('/');
+                let url = client.base_url().clone();
                 let mut url = url;
                 _ = url.path_segments_mut().unwrap().push(segments);
                 url
             }
         };
 
-        let inner = ReqwestClient::new(api_url.clone());
+        client.set_base_url(api_url.clone());
 
-        let GetLoginResponseBody { oidc } =
-            inner.execute(LoginGetRequest).await.context(ReqwestSnafu)?;
+        let GetLoginResponseBody { oidc } = client
+            .execute(LoginGetRequest)
+            .await
+            .context(ReqwestSnafu)?;
 
         let oidc_url = oidc
             .url
@@ -162,13 +192,13 @@ impl Client {
         Ok(Self {
             oidc_url,
             api_url,
-            inner,
+            inner: client,
         })
     }
 
     /// Get the oidc endpoints from the OIDC provider.
     pub async fn get_oidc_endpoints(&self) -> Result<OidcEndpoints, ClientError> {
-        let oidc_client = ReqwestClient::new(self.oidc_url.clone());
+        let oidc_client = self.inner.clone().with_base_url(self.oidc_url.clone());
         let oidc_endpoints = oidc_client
             .execute(OidcWellKnownRequest)
             .await
