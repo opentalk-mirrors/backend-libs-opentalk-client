@@ -154,6 +154,7 @@ skip = [
   { name = "thiserror", version = "1" },
   { name = "thiserror-impl", version = "1" },
   { name = "tinystr", version = "0.7" },
+  { name = "toml_datetime", version = "0.7" },
   { name = "writeable", version = "0.5" },
 ]
 # Similarly to `skip` allows you to skip certain crates during duplicate
