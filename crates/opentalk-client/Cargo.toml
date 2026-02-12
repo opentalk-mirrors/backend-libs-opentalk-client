@@ -12,7 +12,7 @@ license = "EUPL-1.2"
 name = "opentalk-client"
 publish = true
 repository.workspace = true
-version = "0.0.1-alpha.8"
+version = "0.0.1-alpha.9"
 
 [dependencies]
 anyhow.workspace = true
@@ -23,6 +23,7 @@ http.workspace = true
 http-request-derive.workspace = true
 http-request-derive-client.workspace = true
 http-request-derive-client-reqwest.workspace = true
+http-request-derive-logging.workspace = true
 itertools.workspace = true
 oauth2.workspace = true
 opentalk-client-data-persistence.workspace = true

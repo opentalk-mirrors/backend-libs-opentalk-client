@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: EUPL-1.2
 
 /// A trait for providing authorization tokens for client requests.
-#[async_trait::async_trait]
+#[async_trait::async_trait(?Send)]
 pub trait Authorization {
     /// Get a valid access token.
     ///
