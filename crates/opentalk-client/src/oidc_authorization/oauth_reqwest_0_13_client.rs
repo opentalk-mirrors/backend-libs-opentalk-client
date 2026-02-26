@@ -16,6 +16,9 @@ pub struct ClientWrapper(pub reqwest::Client);
 impl<'c> AsyncHttpClient<'c> for ClientWrapper {
     type Error = HttpClientError<reqwest::Error>;
 
+    #[cfg(target_arch = "wasm32")]
+    type Future = Pin<Box<dyn Future<Output = Result<HttpResponse, Self::Error>> + 'c>>;
+    #[cfg(not(target_arch = "wasm32"))]
     type Future =
         Pin<Box<dyn Future<Output = Result<HttpResponse, Self::Error>> + Send + Sync + 'c>>;
 
@@ -27,17 +30,20 @@ impl<'c> AsyncHttpClient<'c> for ClientWrapper {
                 .await
                 .map_err(Box::new)?;
 
-            let mut builder = http::Response::builder()
-                .status(response.status())
-                .version(response.version());
+            let mut builder = http::Response::builder().status(response.status());
+
+            #[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+            {
+                builder = builder.version(response.version());
+            }
 
             for (name, value) in response.headers().iter() {
                 builder = builder.header(name, value);
             }
 
-            builder
-                .body(response.bytes().await.map_err(Box::new)?.to_vec())
-                .map_err(HttpClientError::Http)
+            let bytes = response.bytes().await.map_err(Box::new)?.to_vec();
+
+            builder.body(bytes).map_err(HttpClientError::Http)
         })
     }
 }

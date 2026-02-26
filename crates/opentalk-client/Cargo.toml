@@ -33,5 +33,5 @@ reqwest.workspace = true
 secrecy.workspace = true
 serde = { workspace = true, features = ["derive"] }
 snafu.workspace = true
-tokio = { workspace = true, features = ["macros", "rt"] }
+tokio = { workspace = true, features = ["macros", "rt", "time"] }
 url = { workspace = true, features = ["serde"] }

@@ -67,11 +67,15 @@ impl OidcDeviceAuthorization {
             )
             .set_token_uri(TokenUrl::new(self.oidc_endpoints.token_endpoint.to_string()).unwrap());
 
-        let http_client = reqwest::ClientBuilder::new()
+        let builder = reqwest::ClientBuilder::new();
+
+        #[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+        let builder = {
             // Following redirects opens the client up to SSRF vulnerabilities.
-            .redirect(reqwest::redirect::Policy::none())
-            .build()
-            .expect("Client should build");
+            builder.redirect(reqwest::redirect::Policy::none())
+        };
+
+        let http_client = builder.build().expect("Client should build");
         let http_client = super::ClientWrapper(http_client);
 
         let response = client
@@ -136,11 +140,15 @@ impl OidcDeviceAuthorization {
             .set_token_uri(TokenUrl::new(oidc_endpoints.token_endpoint.to_string()).unwrap())
             .set_device_authorization_url(device_auth_url);
 
-        let http_client = reqwest::ClientBuilder::new()
+        let builder = reqwest::ClientBuilder::new();
+
+        #[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+        let builder = {
             // Following redirects opens the client up to SSRF vulnerabilities.
-            .redirect(reqwest::redirect::Policy::none())
-            .build()
-            .expect("Client should build");
+            builder.redirect(reqwest::redirect::Policy::none())
+        };
+
+        let http_client = builder.build().expect("Client should build");
         let http_client = super::ClientWrapper(http_client);
 
         let pull_client = oidc_client.clone();
