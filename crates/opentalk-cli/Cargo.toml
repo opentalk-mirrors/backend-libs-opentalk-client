@@ -12,7 +12,7 @@ license = "EUPL-1.2"
 name = "opentalk-cli"
 publish = true
 repository.workspace = true
-version = "0.0.1-alpha.10"
+version = "0.0.1-alpha.11"
 
 [dependencies]
 anyhow.workspace = true
