@@ -8,9 +8,10 @@ use anyhow::{Result, bail};
 use clap::Parser;
 use opentalk_client::{Client, OidcDeviceAuthorization, OidcDirectAccessGrant};
 use opentalk_client_data_persistence::{
-    ConfigManager, DataManager, OpenTalkAccountConfig, OpenTalkAccountId, OpenTalkInstanceConfig,
+    ConfigManager, OpenTalkAccountConfig, OpenTalkAccountId, OpenTalkInstanceConfig,
     OpenTalkInstanceId,
 };
+use opentalk_client_data_persistence_filesystem::FilesystemDataManager;
 use opentalk_client_requests_api_v1::EventsGetRequest;
 use opentalk_types_api_v1::events::{EventExceptionResource, EventOrException, EventResource};
 use url::Url;
@@ -153,7 +154,7 @@ async fn list_events(
     let client = Client::discover(instance_id.into()).await?;
     let oidc_endpoints = client.get_oidc_endpoints().await?;
 
-    let data_manager = DataManager::new()?;
+    let data_manager = Box::new(FilesystemDataManager::new()?);
 
     let authorization = OidcDeviceAuthorization::load_from_datamanager(
         data_manager,
@@ -212,7 +213,7 @@ async fn login(
     account_id: OpenTalkAccountId,
     oidc_client_id: String,
 ) -> Result<()> {
-    let data_manager = DataManager::new()?;
+    let data_manager = Box::new(FilesystemDataManager::new()?);
 
     let client = Client::discover(instance_id.clone().into()).await?;
     let oidc_endpoints = client.get_oidc_endpoints().await?;
@@ -269,7 +270,7 @@ async fn login_with_password(
     oidc_user: String,
     oidc_password: String,
 ) -> Result<()> {
-    let data_manager = DataManager::new()?;
+    let data_manager = Box::new(FilesystemDataManager::new()?);
 
     let client = Client::discover(instance_id.clone().into()).await?;
     let oidc_endpoints = client.get_oidc_endpoints().await?;

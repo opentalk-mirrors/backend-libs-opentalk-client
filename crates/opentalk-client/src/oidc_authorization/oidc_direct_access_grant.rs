@@ -19,7 +19,7 @@ use crate::{Authorization, oidc::OidcEndpoints, oidc_authorization::REFRESH_BEFO
 #[derive(Debug)]
 pub struct OidcDirectAccessGrant {
     instance_account_id: OpenTalkInstanceAccountId,
-    data_manager: DataManager,
+    data_manager: Box<dyn DataManager>,
     oidc_endpoints: OidcEndpoints,
     oidc_client_id: String,
 }
@@ -102,7 +102,7 @@ impl OidcDirectAccessGrant {
 
     /// perform oidc direct access grand authorization
     pub async fn create_with_direct_access_grant(
-        data_manager: DataManager,
+        data_manager: Box<dyn DataManager>,
         oidc_endpoints: OidcEndpoints,
         oidc_client_id: String,
         oidc_user: String,

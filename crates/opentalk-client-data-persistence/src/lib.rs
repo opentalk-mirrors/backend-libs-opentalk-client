@@ -20,7 +20,6 @@
     unused_results
 )]
 
-mod account_data_file;
 mod account_tokens;
 mod config;
 mod config_error;

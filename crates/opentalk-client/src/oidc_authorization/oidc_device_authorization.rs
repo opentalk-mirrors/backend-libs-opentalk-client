@@ -18,7 +18,7 @@ use crate::{Authorization, oidc::OidcEndpoints, oidc_authorization::REFRESH_BEFO
 #[derive(Debug)]
 pub struct OidcDeviceAuthorization {
     instance_account_id: OpenTalkInstanceAccountId,
-    data_manager: DataManager,
+    data_manager: Box<dyn DataManager>,
     oidc_endpoints: OidcEndpoints,
     oidc_client_id: String,
 }
@@ -41,7 +41,7 @@ impl Authorization for &OidcDeviceAuthorization {
 impl OidcDeviceAuthorization {
     /// TODO
     pub async fn load_from_datamanager(
-        data_manager: DataManager,
+        data_manager: Box<dyn DataManager>,
         oidc_client_id: String,
         instance_account_id: &OpenTalkInstanceAccountId,
         oidc_endpoints: OidcEndpoints,
@@ -126,7 +126,7 @@ impl OidcDeviceAuthorization {
 
     /// perform oidc device authorization
     pub async fn create_with_device_authorization(
-        data_manager: DataManager,
+        data_manager: Box<dyn DataManager>,
         oidc_endpoints: OidcEndpoints,
         oidc_client_id: String,
         instance_account_id: &OpenTalkInstanceAccountId,

@@ -20,6 +20,7 @@ clap = { workspace = true, features = ["derive"] }
 env_logger.workspace = true
 opentalk-client.workspace = true
 opentalk-client-data-persistence.workspace = true
+opentalk-client-data-persistence-filesystem.workspace = true
 opentalk-client-requests-api-v1.workspace = true
 opentalk-types-api-v1.workspace = true
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
