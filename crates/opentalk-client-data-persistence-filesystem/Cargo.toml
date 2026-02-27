@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: OpenTalk GmbH <mail@opentalk.eu>
+#
+# SPDX-License-Identifier: EUPL-1.2
+
+[package]
+authors.workspace = true
+description = "Data persistence on the file system for opentalk-client"
+documentation = "https://docs.rs/opentalk-client-data-persistence-filesystem"
+edition = "2024"
+homepage.workspace = true
+license = "EUPL-1.2"
+name = "opentalk-client-data-persistence-filesystem"
+publish = true
+repository.workspace = true
+version = "0.0.1-alpha.11"
+
+[dependencies]
+dirs.workspace = true
+opentalk-client-data-persistence.workspace = true
+serde = { workspace = true, features = ["derive"] }
+snafu.workspace = true
+toml.workspace = true
+
+[dev-dependencies]
+pretty_assertions.workspace = true
+tempfile.workspace = true
