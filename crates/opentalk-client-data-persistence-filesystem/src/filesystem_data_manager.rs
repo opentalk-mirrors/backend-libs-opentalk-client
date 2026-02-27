@@ -18,50 +18,51 @@ use crate::{
     },
 };
 
-/// The [DataManager] stores and loads local data from provided pathes
+/// The [FilesystemDataManager] stores and loads local data from provided pathes
 #[derive(Debug)]
 pub struct FilesystemDataManager {
     path: PathBuf,
+    instance_account_id: OpenTalkInstanceAccountId,
 }
 
 impl DataManager for FilesystemDataManager {
-    fn load_instance(&self, id: &OpenTalkInstanceAccountId) -> Result<AccountTokens, DataError> {
-        Ok(FilesystemDataManager::load_instance(self, id)?)
+    fn load_account_tokens(&self) -> Result<AccountTokens, DataError> {
+        Ok(FilesystemDataManager::load_account_tokens(self)?)
     }
 
-    fn store_instance(
+    fn store_account_tokens(
         &self,
-        id: &OpenTalkInstanceAccountId,
         opentalk_account_tokens: AccountTokens,
     ) -> Result<(), DataError> {
         Ok(FilesystemDataManager::store_instance(
             self,
-            id,
             opentalk_account_tokens,
         )?)
     }
 }
 
 impl FilesystemDataManager {
-    /// Returns [DataManager] instance
-    pub fn new() -> Result<Self, FilesystemDataError> {
+    /// Returns [FilesystemDataManager] instance
+    pub fn new(
+        instance_account_id: OpenTalkInstanceAccountId,
+    ) -> Result<Self, FilesystemDataError> {
         let data_path = dirs::data_dir()
             .context(SystemDataHomeNotSetSnafu)?
             .join("opentalk/cli");
 
-        Ok(Self { path: data_path })
+        Ok(Self {
+            path: data_path,
+            instance_account_id,
+        })
     }
 
-    fn data_file_path(&self, id: &OpenTalkInstanceAccountId) -> PathBuf {
-        self.path.join(format!("{}.toml", id.to_file_stem()))
+    fn data_file_path(&self) -> PathBuf {
+        self.path
+            .join(format!("{}.toml", self.instance_account_id.to_file_stem()))
     }
 
-    /// Load instaceData
-    pub fn load_instance(
-        &self,
-        id: &OpenTalkInstanceAccountId,
-    ) -> Result<AccountTokens, FilesystemDataError> {
-        let file = fs::read_to_string(self.data_file_path(id)).context(NotLoadableSnafu {
+    fn load_account_tokens(&self) -> Result<AccountTokens, FilesystemDataError> {
+        let file = fs::read_to_string(self.data_file_path()).context(NotLoadableSnafu {
             path: self.path.clone(),
         })?;
 
@@ -72,13 +73,11 @@ impl FilesystemDataManager {
         Ok(data.opentalk_account_tokens)
     }
 
-    /// Store instaceData
-    pub fn store_instance(
+    fn store_instance(
         &self,
-        id: &OpenTalkInstanceAccountId,
         opentalk_account_tokens: AccountTokens,
     ) -> Result<(), FilesystemDataError> {
-        let data_path = self.data_file_path(id);
+        let data_path = self.data_file_path();
 
         if let Some(data_dir) = data_path.parent() {
             fs::create_dir_all(data_dir).context(FolderNotCreatableSnafu { path: data_dir })?;
@@ -132,6 +131,11 @@ refresh_token = "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
 
         let data_manager = FilesystemDataManager {
             path: data_path.clone(),
+            instance_account_id: (
+                "http://example_instance.example".parse().unwrap(),
+                "example-account".parse().unwrap(),
+            )
+                .into(),
         };
 
         let account_data_file_path =
@@ -140,13 +144,7 @@ refresh_token = "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
             let _ = std::fs::File::create(&account_data_file_path).unwrap();
         }
 
-        let data = data_manager.load_instance(
-            &(
-                "http://example_instance.example".parse().unwrap(),
-                "example-account".parse().unwrap(),
-            )
-                .into(),
-        );
+        let data = data_manager.load_account_tokens();
 
         assert_matches!(data, Err(FilesystemDataError::NotReadable { path, source: _ }) if path == data_path);
     }
@@ -159,15 +157,14 @@ refresh_token = "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
         let data_path = temp_dir.path().join("data");
         let data_manager = FilesystemDataManager {
             path: data_path.clone(),
-        };
-
-        let data = data_manager.load_instance(
-            &(
+            instance_account_id: (
                 "http://example_instance.example".parse().unwrap(),
                 "example-account".parse().unwrap(),
             )
                 .into(),
-        );
+        };
+
+        let data = data_manager.load_account_tokens();
 
         assert_matches!(data, Err(FilesystemDataError::NotLoadable { path, source: _ }) if path == data_path);
     }
@@ -182,6 +179,11 @@ refresh_token = "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
 
         let data_manager = FilesystemDataManager {
             path: data_path.clone(),
+            instance_account_id: (
+                "http://example_instance.example".parse().unwrap(),
+                "example-account".parse().unwrap(),
+            )
+                .into(),
         };
 
         let account_data_file_path =
@@ -191,15 +193,7 @@ refresh_token = "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
             write!(file, "{EXAMPLE_DATA}").unwrap();
         }
 
-        let data = data_manager
-            .load_instance(
-                &(
-                    "http://example_instance.example".parse().unwrap(),
-                    "example-account".parse().unwrap(),
-                )
-                    .into(),
-            )
-            .unwrap();
+        let data = data_manager.load_account_tokens().unwrap();
 
         assert_eq!(data, example());
     }
@@ -216,6 +210,11 @@ refresh_token = "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
 
         let data_manager = FilesystemDataManager {
             path: data_path.clone(),
+            instance_account_id: (
+                "http://example_instance.example".parse().unwrap(),
+                "example-account".parse().unwrap(),
+            )
+                .into(),
         };
 
         let account_data_file_path =
@@ -225,16 +224,7 @@ refresh_token = "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
             write!(file, "{EXAMPLE_DATA}").unwrap();
         }
 
-        data_manager
-            .store_instance(
-                &(
-                    "http://example_instance.example".parse().unwrap(),
-                    "example-account".parse().unwrap(),
-                )
-                    .into(),
-                data,
-            )
-            .unwrap();
+        data_manager.store_instance(data).unwrap();
 
         let stored_data = std::fs::read_to_string(&account_data_file_path).unwrap();
 
@@ -249,7 +239,14 @@ refresh_token = "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
             // that we don't set `XDG_DATA_HOME` anywhere else.
             std::env::set_var("XDG_DATA_HOME", "/tmp/test/.local/share/");
         }
-        let config_manager = FilesystemDataManager::new().unwrap();
+        let config_manager = FilesystemDataManager::new(
+            (
+                "http://example_instance.example".parse().unwrap(),
+                "example-account".parse().unwrap(),
+            )
+                .into(),
+        )
+        .unwrap();
         assert_eq!(
             config_manager.path,
             Path::new("/tmp/test/.local/share/opentalk/cli")

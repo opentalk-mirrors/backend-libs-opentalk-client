@@ -10,14 +10,13 @@ use oauth2::{
     AuthUrl, ClientId, DeviceAuthorizationUrl, RefreshToken, Scope,
     StandardDeviceAuthorizationResponse, TokenResponse, TokenUrl, basic::BasicClient,
 };
-use opentalk_client_data_persistence::{AccountTokens, DataManager, OpenTalkInstanceAccountId};
+use opentalk_client_data_persistence::{AccountTokens, DataManager};
 
 use crate::{Authorization, oidc::OidcEndpoints, oidc_authorization::REFRESH_BEFORE_EXPIRY};
 
 /// TODO
 #[derive(Debug)]
 pub struct OidcDeviceAuthorization {
-    instance_account_id: OpenTalkInstanceAccountId,
     data_manager: Box<dyn DataManager>,
     oidc_endpoints: OidcEndpoints,
     oidc_client_id: String,
@@ -43,13 +42,11 @@ impl OidcDeviceAuthorization {
     pub async fn load_from_datamanager(
         data_manager: Box<dyn DataManager>,
         oidc_client_id: String,
-        instance_account_id: &OpenTalkInstanceAccountId,
         oidc_endpoints: OidcEndpoints,
     ) -> Result<Self> {
-        let _ = data_manager.load_instance(instance_account_id)?;
+        let _ = data_manager.load_account_tokens()?;
 
         Ok(Self {
-            instance_account_id: instance_account_id.clone(),
             data_manager,
             oidc_endpoints,
             oidc_client_id,
@@ -58,8 +55,7 @@ impl OidcDeviceAuthorization {
 
     /// Performs token refresh
     pub async fn refresh_token(&self) -> Result<String> {
-        let AccountTokens { refresh_token, .. } =
-            self.data_manager.load_instance(&self.instance_account_id)?;
+        let AccountTokens { refresh_token, .. } = self.data_manager.load_account_tokens()?;
 
         let client = BasicClient::new(ClientId::new(self.oidc_client_id.clone()))
             .set_auth_uri(
@@ -92,17 +88,14 @@ impl OidcDeviceAuthorization {
         };
         let _ = self
             .data_manager
-            .store_instance(&self.instance_account_id, account_tokens.clone());
+            .store_account_tokens(account_tokens.clone());
 
         Ok(account_tokens.access_token)
     }
 
     /// Loads access token
     pub async fn get_token(self) -> Result<String> {
-        Ok(self
-            .data_manager
-            .load_instance(&self.instance_account_id)?
-            .access_token)
+        Ok(self.data_manager.load_account_tokens()?.access_token)
     }
 
     /// Loads accesss token and calls refresh if needed
@@ -114,7 +107,7 @@ impl OidcDeviceAuthorization {
             access_token_expiry,
             access_token,
             ..
-        } = self.data_manager.load_instance(&self.instance_account_id)?;
+        } = self.data_manager.load_account_tokens()?;
 
         let now = Utc::now();
         if now + refresh_before_expiry > access_token_expiry {
@@ -129,7 +122,6 @@ impl OidcDeviceAuthorization {
         data_manager: Box<dyn DataManager>,
         oidc_endpoints: OidcEndpoints,
         oidc_client_id: String,
-        instance_account_id: &OpenTalkInstanceAccountId,
     ) -> Result<Self> {
         let device_auth_url =
             DeviceAuthorizationUrl::new(oidc_endpoints.device_authorization_endpoint.to_string())
@@ -185,12 +177,11 @@ impl OidcDeviceAuthorization {
                 .into_secret(),
         };
 
-        data_manager.store_instance(instance_account_id, account_tokens.clone())?;
+        data_manager.store_account_tokens(account_tokens.clone())?;
 
         println!("{:?}", token_result);
 
         Ok(Self {
-            instance_account_id: instance_account_id.clone(),
             data_manager,
             oidc_endpoints,
             oidc_client_id,

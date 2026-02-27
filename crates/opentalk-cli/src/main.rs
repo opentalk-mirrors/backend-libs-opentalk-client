@@ -154,12 +154,11 @@ async fn list_events(
     let client = Client::discover(instance_id.into()).await?;
     let oidc_endpoints = client.get_oidc_endpoints().await?;
 
-    let data_manager = Box::new(FilesystemDataManager::new()?);
+    let data_manager = Box::new(FilesystemDataManager::new(instance_account_id)?);
 
     let authorization = OidcDeviceAuthorization::load_from_datamanager(
         data_manager,
         account.oidc_client_id,
-        &instance_account_id,
         oidc_endpoints,
     )
     .await?;
@@ -213,7 +212,9 @@ async fn login(
     account_id: OpenTalkAccountId,
     oidc_client_id: String,
 ) -> Result<()> {
-    let data_manager = Box::new(FilesystemDataManager::new()?);
+    let data_manager = Box::new(FilesystemDataManager::new(
+        (instance_id.clone(), account_id.clone()).into(),
+    )?);
 
     let client = Client::discover(instance_id.clone().into()).await?;
     let oidc_endpoints = client.get_oidc_endpoints().await?;
@@ -222,7 +223,6 @@ async fn login(
         data_manager,
         oidc_endpoints,
         oidc_client_id.clone(),
-        &(instance_id.clone(), account_id.clone()).into(),
     )
     .await?;
 
@@ -270,7 +270,9 @@ async fn login_with_password(
     oidc_user: String,
     oidc_password: String,
 ) -> Result<()> {
-    let data_manager = Box::new(FilesystemDataManager::new()?);
+    let data_manager = Box::new(FilesystemDataManager::new(
+        (instance_id.clone(), account_id.clone()).into(),
+    )?);
 
     let client = Client::discover(instance_id.clone().into()).await?;
     let oidc_endpoints = client.get_oidc_endpoints().await?;
@@ -281,7 +283,6 @@ async fn login_with_password(
         oidc_client_id.clone(),
         oidc_user,
         oidc_password.into(),
-        &(instance_id.clone(), account_id.clone()).into(),
     )
     .await?;
 
