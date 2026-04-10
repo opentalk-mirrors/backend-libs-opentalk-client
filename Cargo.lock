@@ -205,9 +205,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.2.59"
+version = "1.2.60"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7a4d3ec6524d28a329fc53654bbadc9bdd7b0431f5d65f1a56ffb28a1ee5283"
+checksum = "43c5703da9466b66a946814e1adf53ea2c90f10063b86290cc9eb67ce3478a20"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -945,9 +945,9 @@ dependencies = [
 
 [[package]]
 name = "http-request-derive"
-version = "0.5.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4085afd150b132986335ca72c788d86d77a612abe114119f837472d53cc11738"
+checksum = "0d1f8770e80ef90b9d4e92cd91d27209559debe4daf260c9fc7cd53f31638274"
 dependencies = [
  "bytes",
  "http",
@@ -961,9 +961,9 @@ dependencies = [
 
 [[package]]
 name = "http-request-derive-client"
-version = "0.2.1"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "78eca2dba86b5cc13f4861de7010bea7b316a52ed6ee76db3e5401b85e293e3f"
+checksum = "59d995860ad0cd3feb5d6eb4164aad2dd5ddb536f775bf9eab3957ed3e92e538"
 dependencies = [
  "async-trait",
  "http-request-derive",
@@ -971,9 +971,9 @@ dependencies = [
 
 [[package]]
 name = "http-request-derive-client-reqwest"
-version = "0.4.2"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "113ae34bc34cfc10007060b4efc34865caca2288b9258e5628fa0ce6b227092a"
+checksum = "a263e538ab42756beb935daf4309581be3c5d2ec06a50f8fcd509f7d167d5a7c"
 dependencies = [
  "async-trait",
  "bytes",
@@ -1648,9 +1648,9 @@ dependencies = [
 
 [[package]]
 name = "opentalk-types-api-common"
-version = "0.6.1"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "38a94060aa855222985b08f0d68953b8350a17662e13f1d373da4ccbbd236ad3"
+checksum = "a48a8bc4920985cfc3aa169aa38a72bff27ad75402bba5750f94db9ad68477a5"
 dependencies = [
  "base64",
  "derive_more",
@@ -1662,9 +1662,9 @@ dependencies = [
 
 [[package]]
 name = "opentalk-types-api-v1"
-version = "0.53.0"
+version = "0.56.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0e5e7e4fe1354a740dcfbbdd99095ba5528f4ff2fbd9f52fc04596947df047a"
+checksum = "b1d4dc622be57ef954f666542cf92400b853b3518f51254b311f3e80bc2e1018"
 dependencies = [
  "chrono",
  "chrono-tz",
@@ -1678,9 +1678,9 @@ dependencies = [
 
 [[package]]
 name = "opentalk-types-common"
-version = "0.42.3"
+version = "0.43.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac1665715081e6142523a327c9e206230dc0da81e593602b363a25932d1674e8"
+checksum = "de2bf39dea22d065b24209b422d992d517a20da9b8b67cb25e30deeda78733d1"
 dependencies = [
  "chrono",
  "chrono-tz",
@@ -1700,9 +1700,9 @@ dependencies = [
 
 [[package]]
 name = "opentalk-types-common-identifiers"
-version = "0.33.0"
+version = "0.34.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "48920a374d6fd87ca1bfbe237e966e821f8bb0e0ebf0de1039aed64f6a464222"
+checksum = "237f233535241c0469dc182de78c4100b9108ced75f2c9d1c64f4e9b22401916"
 dependencies = [
  "derive_more",
  "serde",
@@ -1712,9 +1712,9 @@ dependencies = [
 
 [[package]]
 name = "opentalk-types-common-macros"
-version = "0.32.0"
+version = "0.33.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5aff14ff5815976bbedb0c652565beb6e88e80e6886f15eca25a734deab2d344"
+checksum = "4db3542ad75eaca20ff237188eb424256d43f099f7db94b35d734fce11e08158"
 dependencies = [
  "opentalk-types-common-identifiers",
  "proc-macro-crate",
@@ -2487,18 +2487,18 @@ checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 
 [[package]]
 name = "snafu"
-version = "0.8.9"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6e84b3f4eacbf3a1ce05eac6763b4d629d60cbc94d632e4092c54ade71f1e1a2"
+checksum = "d1d4bced6a69f90b2056c03dcff2c4737f98d6fb9e0853493996e1d253ca29c6"
 dependencies = [
  "snafu-derive",
 ]
 
 [[package]]
 name = "snafu-derive"
-version = "0.8.9"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c1c97747dbf44bb1ca44a561ece23508e99cb592e862f22222dcf42f51d1e451"
+checksum = "54254b8531cafa275c5e096f62d48c81435d1015405a91198ddb11e967301d40"
 dependencies = [
  "heck",
  "proc-macro2",
