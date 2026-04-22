@@ -18,6 +18,7 @@ version = "0.0.1-alpha.13"
 bytes.workspace = true
 http.workspace = true
 http-request-derive.workspace = true
+opentalk-types-api-common = { workspace = true, features = ["serde"] }
 opentalk-types-api-v1 = { workspace = true, features = ["serde"] }
 opentalk-types-common = { workspace = true, features = ["serde"] }
 snafu.workspace = true
