@@ -27,10 +27,8 @@ pub struct UsersMeAssetsGetRequest {
 mod tests {
     use chrono::{DateTime, TimeZone, Utc};
     use httpmock::MockServer;
-    use opentalk_types_api_v1::{
-        assets::AssetResource,
-        users::{GetUserAssetsResponseBody, UserAssetResource},
-    };
+    use opentalk_types_api_common::module_assets::AssetResource;
+    use opentalk_types_api_v1::users::{GetUserAssetsResponseBody, UserAssetResource};
     use opentalk_types_common::{
         assets::{AssetId, AssetSorting},
         events::EventId,
