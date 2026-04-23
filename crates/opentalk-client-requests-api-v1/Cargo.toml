@@ -5,7 +5,7 @@
 [package]
 authors.workspace = true
 description = "Datatypes that describe requests to the endpoints of the OpenTalk v1 API to be used by clients"
-documentation = "https://docs.rs/opentalk-cli"
+documentation = "https://docs.rs/opentalk-client-requests-api-v1"
 edition = "2024"
 homepage.workspace = true
 license = "EUPL-1.2"
