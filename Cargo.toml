@@ -12,6 +12,7 @@ homepage = "https://opentalk.eu/"
 repository = "https://gitlab.opencode.de/opentalk/libs/opentalk-client"
 
 [workspace.dependencies]
+opentalk-cli = { path = "crates/opentalk-client", version = "0.0.2" }
 opentalk-client = { path = "crates/opentalk-client", version = "0.0.2" }
 opentalk-client-data-persistence = { path = "crates/opentalk-client-data-persistence", version = "0.0.1" }
 opentalk-client-data-persistence-filesystem = { path = "crates/opentalk-client-data-persistence-filesystem", version = "0.0.1" }
