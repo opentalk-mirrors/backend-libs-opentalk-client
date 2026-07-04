@@ -1015,9 +1015,9 @@ dependencies = [
 
 [[package]]
 name = "http-request-derive-client-reqwest"
-version = "0.5.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a263e538ab42756beb935daf4309581be3c5d2ec06a50f8fcd509f7d167d5a7c"
+checksum = "b568dc26b06bf58579e3441b52bb4751bc906de820b304fadd6fe1af537b0805"
 dependencies = [
  "async-trait",
  "bytes",
