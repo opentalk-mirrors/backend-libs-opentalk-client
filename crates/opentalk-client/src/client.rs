@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: EUPL-1.2
 
+use std::net::SocketAddr;
+
 use bytes::Bytes;
 use http_request_derive::HttpRequest;
 use http_request_derive_client::Client as _;
@@ -77,6 +79,20 @@ pub enum ClientError {
         /// The invalid URL
         url: Url,
     },
+
+    /// A configured root certificate could not be parsed as PEM.
+    #[snafu(display("Failed to parse a root certificate as PEM"))]
+    CertificatePem {
+        /// The source error.
+        source: reqwest::Error,
+    },
+
+    /// The HTTP client could not be constructed from the given configuration.
+    #[snafu(display("Failed to build the HTTP client"))]
+    BuildReqwestClient {
+        /// The source error.
+        source: reqwest::Error,
+    },
 }
 
 impl From<ReqwestClientError> for ClientError {
@@ -102,20 +118,22 @@ pub struct Client {
 }
 
 impl Client {
-    /// Discover the OpenTalk API information based on the frontend or controller API URL.
+    /// Start building a [`Client`]
+    pub fn builder(url: Url) -> ClientBuilder {
+        ClientBuilder::new(url)
+    }
+
+    /// Builds a [`Client`] and discovers the OpenTalk API information based on the frontend or controller API URL.
     pub async fn discover(url: Url) -> Result<Self, ClientError> {
-        Self::discover_inner(ReqwestClient::new(url)).await
+        Self::builder(url).discover().await
     }
 
-    /// Discover the OpenTalk API information based on the frontend or controller API URL.
-    ///
-    /// When using this function for discovery, the logger will be informed about all requests
-    /// performed by this [`Client`].
-    pub async fn discover_with_logger(url: Url, logger: HttpLogger) -> Result<Self, ClientError> {
-        Self::discover_inner(ReqwestClient::new(url).with_logger(logger)).await
+    /// Builds a [`Client`] and discovers the OpenTalk API information based on the controller API URL.
+    pub async fn discover_controller(url: Url) -> Result<Self, ClientError> {
+        Self::builder(url).discover_controller().await
     }
 
-    async fn discover_inner(mut client: ReqwestClient) -> Result<Self, ClientError> {
+    async fn discover_from(mut client: ReqwestClient) -> Result<Self, ClientError> {
         match client
             .execute(WellKnownFrontendRequest)
             .await
@@ -128,26 +146,10 @@ impl Client {
             }
             WellKnownFrontendResponse::NotFound => {}
         };
-        Self::discover_controller_inner(client).await
+        Self::discover_controller_from(client).await
     }
 
-    /// Discover the OpenTalk API information based on the controller API URL.
-    pub async fn discover_controller(url: Url) -> Result<Self, ClientError> {
-        Self::discover_controller_inner(ReqwestClient::new(url)).await
-    }
-
-    /// Discover the OpenTalk API information based on the controller API URL.
-    ///
-    /// When using this function for discovery, the logger will be informed about all requests
-    /// performed by this [`Client`].
-    pub async fn discover_controller_with_logger(
-        url: Url,
-        logger: HttpLogger,
-    ) -> Result<Self, ClientError> {
-        Self::discover_controller_inner(ReqwestClient::new(url).with_logger(logger)).await
-    }
-
-    async fn discover_controller_inner(mut client: ReqwestClient) -> Result<Self, ClientError> {
+    async fn discover_controller_from(mut client: ReqwestClient) -> Result<Self, ClientError> {
         let WellKnownApiBody {
             opentalk_api: ApiInfo { v1 },
         } = client
@@ -237,6 +239,90 @@ impl Client {
     // fn refresh_access_token(&self, instance_account_id: OpenTalkInstanceAccountId)
 }
 
+/// Builder for constructing and discovering a [`Client`].
+///
+/// Collects optional configuration before building and discovery via [`ClientBuilder::discover`] or
+/// [`ClientBuilder::discover_controller`].
+///
+/// Pure `build` method is missing, as an undiscovered [`Client`] is useless
+#[derive(Debug)]
+pub struct ClientBuilder {
+    url: Url,
+    logger: Option<HttpLogger>,
+    certs: Vec<Vec<u8>>,
+    dns_overrides: Vec<(String, SocketAddr)>,
+}
+
+impl ClientBuilder {
+    /// Constructs a new [`ClientBuilder`].
+    ///
+    /// This is the same as [`Client::builder()`].
+    pub fn new(url: Url) -> Self {
+        ClientBuilder {
+            url,
+            logger: None,
+            certs: Vec::new(),
+            dns_overrides: Vec::new(),
+        }
+    }
+
+    /// Return a built [`Client`] that uses this [`ClientBuilder`] configuration with discovered OpenTalk
+    /// API information based on the frontend or controller API
+    pub async fn discover(self) -> Result<Client, ClientError> {
+        Client::discover_from(self.into_reqwest_client()?).await
+    }
+
+    /// Return a built [`Client`] that uses this [`ClientBuilder`] configuration with discovered OpenTalk
+    /// API information based on the controller API
+    pub async fn discover_controller(self) -> Result<Client, ClientError> {
+        Client::discover_controller_from(self.into_reqwest_client()?).await
+    }
+
+    /// Set a logger that is informed about all requests performed by the [`Client`].
+    pub fn with_logger(mut self, logger: HttpLogger) -> Self {
+        self.logger = Some(logger);
+        self
+    }
+
+    /// Add a custom PEM encoded certificate
+    pub fn add_pem_cert(mut self, pem: &[u8]) -> Self {
+        self.certs.push(pem.to_vec());
+        self
+    }
+
+    /// Add DNS override
+    pub fn add_dns_override(mut self, domain: &str, addr: SocketAddr) -> Self {
+        self.dns_overrides.push((domain.to_owned(), addr));
+        self
+    }
+
+    fn into_reqwest_client(self) -> Result<ReqwestClient, ClientError> {
+        let ClientBuilder {
+            url,
+            logger,
+            certs,
+            dns_overrides,
+        } = self;
+
+        let mut builder = reqwest::Client::builder();
+
+        for pem in &certs {
+            let cert = reqwest::Certificate::from_pem(pem).context(CertificatePemSnafu)?;
+            builder = builder.tls_certs_merge([cert]);
+        }
+        for (domain, addr) in &dns_overrides {
+            builder = builder.resolve(domain, *addr);
+        }
+
+        let client = builder.build().context(BuildReqwestClientSnafu)?;
+        let mut inner = ReqwestClient::from_reqwest_client(client, url);
+
+        if let Some(logger) = logger {
+            inner = inner.with_logger(logger);
+        }
+        Ok(inner)
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq, HttpRequest)]
 #[http_request(method="GET", response = WellKnownFrontendResponse, path=".well-known/opentalk/client")]
 struct WellKnownFrontendRequest;
