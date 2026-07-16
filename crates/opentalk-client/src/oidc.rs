@@ -8,7 +8,7 @@ use url::Url;
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct OidcEndpoints {
-    pub device_authorization_endpoint: Url,
+    pub device_authorization_endpoint: Option<Url>,
     pub authorization_endpoint: Url,
     pub token_endpoint: Url,
 }

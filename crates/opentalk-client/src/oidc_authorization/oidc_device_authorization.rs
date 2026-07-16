@@ -4,7 +4,7 @@
 
 use std::time::Duration;
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use chrono::Utc;
 use oauth2::{
     AuthUrl, ClientId, DeviceAuthorizationUrl, RefreshToken, Scope,
@@ -123,9 +123,12 @@ impl OidcDeviceAuthorization {
         oidc_endpoints: OidcEndpoints,
         oidc_client_id: String,
     ) -> Result<Self> {
-        let device_auth_url =
-            DeviceAuthorizationUrl::new(oidc_endpoints.device_authorization_endpoint.to_string())
-                .unwrap();
+        let device_authorization_endpoint = oidc_endpoints
+            .device_authorization_endpoint
+            .as_ref()
+            .ok_or_else(|| anyhow!("OIDC provider does not support Device Authorizaiton grant"))?
+            .to_string();
+        let device_auth_url = DeviceAuthorizationUrl::new(device_authorization_endpoint).unwrap();
 
         let oidc_client = BasicClient::new(ClientId::new(oidc_client_id.clone()))
             .set_auth_uri(AuthUrl::new(oidc_endpoints.authorization_endpoint.to_string()).unwrap())
