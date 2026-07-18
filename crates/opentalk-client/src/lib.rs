@@ -31,5 +31,5 @@ pub use authorization::Authorization;
 pub use client::{Client, ClientError};
 pub use oidc::{OidcAuthMethod, OidcEndpoints};
 pub use oidc_authorization::{
-    OidcDeviceAuthorization, OidcDirectAccessGrant, OidcTokenExchangeGrant,
+    OidcDeviceAuthorization, OidcDirectAccessGrant, OidcGrant, OidcTokenExchangeGrant,
 };
