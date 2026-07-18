@@ -29,4 +29,5 @@ mod oidc_authorization;
 pub use authenticated_client::AuthenticatedClient;
 pub use authorization::Authorization;
 pub use client::{Client, ClientError};
+pub use oidc::OidcEndpoints;
 pub use oidc_authorization::{OidcDeviceAuthorization, OidcDirectAccessGrant};
