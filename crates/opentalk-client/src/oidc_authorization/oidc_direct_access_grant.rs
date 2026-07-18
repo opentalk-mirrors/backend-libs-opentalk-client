@@ -40,7 +40,7 @@ impl Authorization for &OidcDirectAccessGrant {
 
 impl OidcDirectAccessGrant {
     /// Loads accesss token and calls refresh if needed
-    pub async fn get_token_and_refresh_if_needed(
+    async fn get_token_and_refresh_if_needed(
         &self,
         refresh_before_expiry: Duration,
     ) -> Result<String> {
@@ -59,7 +59,7 @@ impl OidcDirectAccessGrant {
     }
 
     /// Performs token refresh
-    pub async fn refresh_token(&self) -> Result<String> {
+    async fn refresh_token(&self) -> Result<String> {
         let AccountTokens { refresh_token, .. } = self.data_manager.load_account_tokens()?;
 
         let client = BasicClient::new(ClientId::new(self.oidc_client_id.clone()))
@@ -98,7 +98,7 @@ impl OidcDirectAccessGrant {
         Ok(account_tokens.access_token)
     }
 
-    /// perform oidc direct access grand authorization
+    /// perform oidc direct access grant authorization
     pub async fn create_with_direct_access_grant(
         data_manager: Box<dyn DataManager>,
         oidc_endpoints: OidcEndpoints,
