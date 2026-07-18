@@ -8,20 +8,19 @@ use serde::Deserialize;
 
 #[derive(HttpRequest)]
 #[http_request(method = "POST", response = TokenExchangeResponse, path = "")]
-#[allow(unused)]
 pub struct TokenExchangeRequest {
     #[http_request(body)]
     pub body: TokenExchangeRequestBody,
 }
 
 #[derive(Debug, Deserialize)]
-#[allow(unused)]
 pub struct TokenExchangeResponse {
     pub access_token: String,
     pub expires_in: Option<u64>,
     pub refresh_token: Option<String>,
 }
 
+#[derive(Debug, Clone)]
 pub struct TokenExchangeRequestBody {
     pub client_id: String,
     pub subject_token: SecretString,

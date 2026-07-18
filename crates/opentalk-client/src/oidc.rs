@@ -28,7 +28,6 @@ pub(crate) struct OidcWellKnownRequest;
 
 /// Supported auth methods to obtain OAuth2/OIDC grants
 #[derive(Debug)]
-#[allow(unused)]
 pub enum OidcAuthMethod {
     /// Used to obtain a Resource Owner Password (Direct Access) grant
     DirectAccess {
