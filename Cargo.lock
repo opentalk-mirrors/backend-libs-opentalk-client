@@ -1003,9 +1003,9 @@ dependencies = [
 
 [[package]]
 name = "http-request-derive-client-reqwest"
-version = "0.6.0"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b568dc26b06bf58579e3441b52bb4751bc906de820b304fadd6fe1af537b0805"
+checksum = "0742ee869a47fba2ea0184933e6f7693af48fa81e26680d0edc2ecf360bc6aa1"
 dependencies = [
  "async-trait",
  "bytes",
@@ -1021,9 +1021,9 @@ dependencies = [
 
 [[package]]
 name = "http-request-derive-logging"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dbdfb417e58158f5150736a69f686573e2984c69149d8c72e144bb708ed5bc7e"
+checksum = "34383b577e315cea63c8b6b8cf3d0a587a9e0e27443a2061118d3307a6a4881b"
 dependencies = [
  "async-trait",
  "bytes",
