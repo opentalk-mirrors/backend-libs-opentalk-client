@@ -148,6 +148,7 @@ skip = [
   { name = "litemap", version = "0.7" },
   { name = "strum", version = "0.27" },
   { name = "strum_macros", version = "0.27" },
+  { name = "syn", version = "2" },
   { name = "thiserror", version = "1" },
   { name = "thiserror-impl", version = "1" },
   { name = "tinystr", version = "0.7" },
