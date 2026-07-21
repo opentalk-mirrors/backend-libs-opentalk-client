@@ -12,8 +12,8 @@ homepage = "https://opentalk.eu/"
 repository = "https://gitlab.opencode.de/opentalk/libs/opentalk-client"
 
 [workspace.dependencies]
-opentalk-cli = { path = "crates/opentalk-client", version = "0.0.2" }
-opentalk-client = { path = "crates/opentalk-client", version = "0.0.2" }
+opentalk-cli = { path = "crates/opentalk-cli", version = "0.0.3" }
+opentalk-client = { path = "crates/opentalk-client", version = "0.0.3" }
 opentalk-client-data-persistence = { path = "crates/opentalk-client-data-persistence", version = "0.0.1" }
 opentalk-client-data-persistence-filesystem = { path = "crates/opentalk-client-data-persistence-filesystem", version = "0.0.1" }
 opentalk-client-requests-api-v1 = { path = "crates/opentalk-client-requests-api-v1", version = "0.0.2" }
@@ -29,8 +29,8 @@ env_logger = "0.11.10"
 http = "1.4.0"
 http-request-derive = "0.6.0"
 http-request-derive-client = "0.3.0"
-http-request-derive-client-reqwest = "0.6.0"
-http-request-derive-logging = "0.1.0"
+http-request-derive-client-reqwest = "0.6.1"
+http-request-derive-logging = "0.2.0"
 httpmock = "0.8.3"
 itertools = "0.15.0"
 log = "0.4.29"

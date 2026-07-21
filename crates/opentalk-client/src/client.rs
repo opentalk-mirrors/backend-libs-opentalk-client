@@ -236,7 +236,10 @@ impl Client {
         authenticated_client.execute(request).await
     }
 
-    // fn refresh_access_token(&self, instance_account_id: OpenTalkInstanceAccountId)
+    /// Get inner [`ReqwestClient`]
+    pub fn reqwest_client(&self) -> &ReqwestClient {
+        &self.inner
+    }
 }
 
 /// Builder for constructing and discovering a [`Client`].
