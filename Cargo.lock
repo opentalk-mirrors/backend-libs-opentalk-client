@@ -1674,9 +1674,9 @@ dependencies = [
 
 [[package]]
 name = "opentalk-types-api-common"
-version = "0.8.0"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d8c22645680de7fc62a8bacc872893e263a43508d86a2130f79e5804f608fc4"
+checksum = "d4f6abac576148227c872c2909408225328a0cb5288c8d02f80fd9a56af535c8"
 dependencies = [
  "base64",
  "chrono",
@@ -1689,9 +1689,9 @@ dependencies = [
 
 [[package]]
 name = "opentalk-types-api-v1"
-version = "0.60.0"
+version = "0.62.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b42c819fb9092fd360cdc3deb35a19563e28e2134ddadff80907d90826925f8"
+checksum = "51974382da213628d2b73c41ca8c06ae9b788736581b4bcf865f8b81900cbb4e"
 dependencies = [
  "chrono",
  "chrono-tz",
@@ -1705,9 +1705,9 @@ dependencies = [
 
 [[package]]
 name = "opentalk-types-common"
-version = "0.45.0"
+version = "0.46.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb3e282c26657aad816af2cecc264308e6f12a7039e9f81d89a2fa4a5e0bc39d"
+checksum = "27e05bd1830eadedad5adcab8e24034edd6d705ca28e089a2aefc2321fbc7646"
 dependencies = [
  "chrono",
  "chrono-tz",
