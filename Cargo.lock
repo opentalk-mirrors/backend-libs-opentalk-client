@@ -1585,7 +1585,7 @@ checksum = "7c87def4c32ab89d880effc9e097653c8da5d6ef28e6b539d313baaacfbafcbe"
 
 [[package]]
 name = "opentalk-cli"
-version = "0.0.3"
+version = "0.0.4"
 dependencies = [
  "anyhow",
  "clap",
@@ -1601,7 +1601,7 @@ dependencies = [
 
 [[package]]
 name = "opentalk-client"
-version = "0.0.3"
+version = "0.0.4"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1656,7 +1656,7 @@ dependencies = [
 
 [[package]]
 name = "opentalk-client-requests-api-v1"
-version = "0.0.3"
+version = "0.0.4"
 dependencies = [
  "bytes",
  "chrono",
