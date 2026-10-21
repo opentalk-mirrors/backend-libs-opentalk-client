@@ -10,6 +10,7 @@ use snafu::Snafu;
 
 /// An error returned from an API request
 #[derive(Debug, Snafu)]
+#[non_exhaustive]
 pub enum ApiError {
     /// The API returned an HTTP 401 UNAUTHORIZED status
     #[snafu(display("The API returned an HTTP 401 UNAUTHORIZED status"))]
@@ -34,6 +35,16 @@ pub enum ApiError {
     /// The API returned an HTTP 404 NOT FOUND status
     #[snafu(display("The API returned an HTTP 404 NOT FOUND status"))]
     NotFound {
+        /// The headers sent with the response
+        headers: BTreeMap<String, String>,
+
+        /// The body of the response
+        body: Bytes,
+    },
+
+    /// The API returned an HTTP 410 GONE status
+    #[snafu(display("The API returned an HTTP 410 GONE status"))]
+    Gone {
         /// The headers sent with the response
         headers: BTreeMap<String, String>,
 
@@ -96,6 +107,10 @@ impl ApiError {
                 headers,
                 body: http_response.into_body(),
             }),
+            StatusCode::GONE => Ok(Self::Gone {
+                headers,
+                body: http_response.into_body(),
+            }),
             StatusCode::INTERNAL_SERVER_ERROR => Ok(Self::InternalServerError {
                 headers,
                 body: http_response.into_body(),
@@ -116,6 +131,7 @@ impl ApiError {
             ApiError::Unauthorized { .. } => c == StatusCode::UNAUTHORIZED.as_u16(),
             ApiError::Forbidden { .. } => c == StatusCode::FORBIDDEN.as_u16(),
             ApiError::NotFound { .. } => c == StatusCode::NOT_FOUND.as_u16(),
+            ApiError::Gone { .. } => c == StatusCode::GONE.as_u16(),
             ApiError::InternalServerError { .. } => c == StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
             ApiError::NonSuccessfulStatusCode { code, .. } => c == code.as_u16(),
         }
@@ -134,6 +150,11 @@ impl ApiError {
     /// Query whether the error is caused by a 404 NOT FOUND HTTP status code
     pub const fn is_not_found(&self) -> bool {
         self.is_http_status_code(StatusCode::NOT_FOUND)
+    }
+
+    /// Query whether the error is caused by a 410 GONE HTTP status code
+    pub const fn is_gone(&self) -> bool {
+        self.is_http_status_code(StatusCode::GONE)
     }
 
     /// Query whether the error is caused by a 500 INTERNAL SERVER ERROR HTTP status code
