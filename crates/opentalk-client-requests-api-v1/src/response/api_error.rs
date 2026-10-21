@@ -10,6 +10,7 @@ use snafu::Snafu;
 
 /// An error returned from an API request
 #[derive(Debug, Snafu)]
+#[non_exhaustive]
 pub enum ApiError {
     /// The API returned an HTTP 401 UNAUTHORIZED status
     #[snafu(display("The API returned an HTTP 401 UNAUTHORIZED status"))]
