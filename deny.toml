@@ -142,6 +142,7 @@ allow = []
 deny = []
 # Certain crates/versions that will be skipped when doing duplicate detection.
 skip = [
+  { name = "base64", version = "0.22" },
   { name = "darling", version = "0.20" },
   { name = "darling_core", version = "0.20" },
   { name = "darling_macro", version = "0.20" },
